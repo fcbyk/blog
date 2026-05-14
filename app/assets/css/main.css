@@ -1,0 +1,112 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  /* 首屏强制暗色保底，防止闪屏 */
+  background-color: #111315;
+
+  --user-message-bg: #95ec69;
+  --my-message-bg: #ffffff;
+  --text-secondary: #999999;
+  --shadow-light: rgba(73, 73, 73, 0.1);
+  --page-bg: #FAFAFA;
+}
+
+html.dark {
+  --user-message-bg: #95ec69;
+  --my-message-bg: #2b2d30;
+  --text-secondary: #8f949a;
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --page-bg: #111315;
+}
+
+html,
+body,
+#__nuxt {
+  min-height: 100dvh;
+  /* 默认：暗色背景 */
+  background: var(--page-bg);
+}
+
+/* ============================== */
+/* 桌面端 + 亮色模式 = 渐变背景 */
+/* ============================== */
+@media (min-width: 768px) {
+  html:not(.dark) body,
+  html:not(.dark) #__nuxt {
+    background: linear-gradient(135deg, #a8b8d8, #c8b8d8, #b8c8d8, #d8b8c8, #b8d8c8);
+    background-size: 300% 300%;
+    background-position: 50% 50%;
+    position: relative;
+  }
+}
+
+/* ============================== */
+/* 移动端 + 亮色模式 = 纯色背景 */
+/* ============================== */
+@media (max-width: 767px) {
+  html:not(.dark) body,
+  html:not(.dark) #__nuxt {
+    background: var(--page-bg) !important;
+  }
+  html:not(.dark)::before {
+    display: none !important;
+  }
+}
+
+/* ============================== */
+/* 暗色模式：全程纯色 */
+/* ============================== */
+html.dark,
+html.dark body,
+html.dark #__nuxt {
+  background: var(--page-bg) !important;
+}
+html.dark::before {
+  display: none !important;
+}
+
+/* 自定义滚动条 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* 消息气泡箭头 */
+.user-message-arrow::before {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-left: 8px solid var(--user-message-bg);
+}
+.my-message-arrow::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 12px;
+  width: 0;
+  height: 0;
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 8px solid var(--my-message-bg);
+}
+
+/* 动画 */
+.animation-delay-200 { animation-delay: 200ms; }
+.animation-delay-400 { animation-delay: 400ms; }
+
+@keyframes message-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.animate-message-pulse {
+  animation: message-pulse 1.4s infinite;
+}

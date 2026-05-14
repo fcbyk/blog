@@ -1,0 +1,16 @@
+{
+  // 全局默认格式化工具 + 保存自动格式化
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // 个人偏好
+  "prettier.semi": false,
+  "prettier.printWidth": 80,
+  "prettier.trailingComma": "none",
+
+  // 通用默认
+  "prettier.tabWidth": 2,
+  "prettier.useTabs": false,
+  "prettier.bracketSpacing": true, // 对象 { a:1 } 大括号两边留空格
+  "prettier.arrowParens": "avoid", // 箭头函数单个参数不加括号 (x)=> → x=>
+  "prettier.endOfLine": "lf" // 换行符统一用 LF（Linux/mac 风格）
+}
