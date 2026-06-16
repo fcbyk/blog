@@ -42,20 +42,22 @@ async function loadContent() {
     loadError.value = false
     return
   }
+  const target = activePath.value
   loading.value = true
   loadError.value = false
   try {
     const res: string = await $fetch('/api/proxy/md', {
-      query: { url: `${GITHUB_RAW_BASE}/${activePath.value}` },
+      query: { url: `${GITHUB_RAW_BASE}/${target}` },
     }) as string
-    contentCache.set(activePath.value, res)
+    // 防止竞态：用户已切走，丢弃结果
+    if (activePath.value !== target) return
+    contentCache.set(target, res)
     rawMarkdown.value = res
   } catch (err) {
     console.error('加载内容失败', err)
     loadError.value = true
-  } finally {
-    loading.value = false
   }
+  loading.value = false
 }
 
 const renderedHtml = computed(() => renderMarkdown(rawMarkdown.value))
