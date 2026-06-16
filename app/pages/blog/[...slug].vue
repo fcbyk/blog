@@ -93,7 +93,7 @@ watch(() => route.params.slug, () => {
   if (newPath && newPath !== activePath.value) {
     activePath.value = newPath
   } else if (!newPath && flatFiles.value.length > 0) {
-    activePath.value = flatFiles.value[0].path
+    activePath.value = flatFiles.value[0]?.path ?? ''
   }
 })
 
@@ -119,7 +119,7 @@ onMounted(async () => {
   if (urlPath && flatFiles.value.some((f) => f.path === urlPath)) {
     activePath.value = urlPath
   } else if (flatFiles.value.length > 0) {
-    activePath.value = flatFiles.value[0].path
+    activePath.value = flatFiles.value[0]?.path ?? ''
     if (!urlPath) {
       const clean = activePath.value.replace(/\.md$/, '')
       router.replace('/blog/' + clean)
@@ -137,7 +137,7 @@ function handleClose() {
     <main
       class="mac-window absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-1 w-full h-full md:w-[70%] md:h-[85%] md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(92,61,43,0.2)] dark:shadow-none dark:border dark:border-[rgba(255,255,255,0.08)]"
     >
-      <div class="flex w-full h-full bg-[rgba(255,250,244,0.92)] dark:bg-[#1a1c1e]/[0.92] backdrop-blur-md relative">
+      <div class="flex w-full h-full bg-[rgba(255,250,244,0.92)] dark:bg-[#1a1c1e]/92 backdrop-blur-md relative">
         <!-- macOS 风格窗口控制按钮 + 侧边栏切换 -->
         <div class="absolute top-4 left-4 z-10 hidden md:flex items-center gap-2">
           <MacWindowControls

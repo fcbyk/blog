@@ -16,9 +16,9 @@ export const useAppStore = defineStore('app', () => {
     loading.value = status
   }
 
-  function setError() {
-    isError.value = true
-    loading.value = false
+  function setError(status = true) {
+    isError.value = status
+    if (status) loading.value = false
   }
 
   function reset() {

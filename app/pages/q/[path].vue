@@ -4,7 +4,10 @@ const appStore = useAppStore()
 const sender = useMessageSender()
 const matcher = useMessageMatcher()
 
-onMounted(async () => {
+// 配置数据就绪后再处理 URL 触发器
+watch(() => appStore.isReady, async (ready) => {
+  if (!ready) return
+
   try {
     const triggerPath = Array.isArray(route.params.path)
       ? route.params.path[0]
@@ -35,7 +38,7 @@ onMounted(async () => {
     console.error('处理 URL 触发器出错:', error)
     await navigateTo('/', { replace: true })
   }
-})
+}, { immediate: true })
 </script>
 
 <template>

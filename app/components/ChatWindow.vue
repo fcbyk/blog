@@ -26,11 +26,33 @@
 
         <!-- 窗口内容区域 -->
         <div class="main flex-1 overflow-hidden flex flex-col mt-8 md:mt-0">
-          <!-- 消息展示区域 -->
-          <MessageList />
-          
-          <!-- 底部输入区域 -->
-          <BottomBar />
+          <!-- 请求失败，显示错误和重试按钮 -->
+          <div v-if="appStore.isError" class="flex-1 flex flex-col items-center justify-center gap-4 px-6">
+            <div class="flex flex-col items-center gap-3">
+              <IconDatabaseError class="w-10 h-10 text-[#ccc] dark:text-[#444]" />
+              <p class="text-sm text-[#999] dark:text-[#666] m-0">数据库连接异常</p>
+            </div>
+            <button
+              @click="handleRetry"
+              class="px-5 py-2 rounded-lg text-sm font-medium border-none cursor-pointer transition-all duration-200 bg-[#f0f0f0] dark:bg-[#2b2d30] text-[#555] dark:text-[#aaa] hover:bg-[#e4e4e4] dark:hover:bg-[#363839]"
+            >
+              重新加载
+            </button>
+          </div>
+
+          <!-- 配置数据加载中 -->
+          <div v-else-if="!appStore.isReady" class="flex-1 flex flex-col items-center justify-center gap-6">
+            <span class="loading-17"></span>
+            <p class="text-sm text-[#999] dark:text-[#666] m-0">获取数据中，{{ countdown }}秒后超时</p>
+          </div>
+
+          <template v-else>
+            <!-- 消息展示区域 -->
+            <MessageList />
+            
+            <!-- 底部输入区域 -->
+            <BottomBar />
+          </template>
         </div>
       </div>
     </div>
@@ -40,6 +62,48 @@
 <script setup lang="ts">
 const chatWindowRef = ref<HTMLElement | null>(null)
 const messageStore = useMessageStore()
+const appStore = useAppStore()
+const { initDatas } = useAppDataManager()
+
+const TIMEOUT_SECONDS = 10
+const countdown = ref(TIMEOUT_SECONDS)
+let countdownTimer: ReturnType<typeof setInterval> | null = null
+
+function startCountdown() {
+  clearCountdown()
+  countdown.value = TIMEOUT_SECONDS
+  countdownTimer = setInterval(() => {
+    if (countdown.value > 0) countdown.value--
+  }, 1000)
+}
+
+function clearCountdown() {
+  if (countdownTimer) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+}
+
+// 加载状态变化时控制倒计时
+watch(
+  () => [appStore.isReady, appStore.isError] as const,
+  ([ready, error]) => {
+    if (!ready && !error) {
+      startCountdown()
+    } else {
+      clearCountdown()
+    }
+  },
+  { immediate: true }
+)
+
+onUnmounted(clearCountdown)
+
+async function handleRetry() {
+  appStore.setError(false)
+  appStore.setLoading(true)
+  await initDatas(true)
+}
 
 const handleWindowMove = (event: MouseEvent) => {
   const el = chatWindowRef.value
@@ -137,6 +201,47 @@ const handleWindowLeave = () => {
         rgba(74, 168, 255, 0.11) 56%,
         rgba(74, 168, 255, 0) 80%
       ) border-box;
+  }
+}
+
+.loading-17 {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  color: #666;
+  left: -100px;
+  animation: loading-17 2s linear infinite;
+}
+
+@keyframes loading-17 {
+  0% {
+    box-shadow: 0 0 #fff0, 0 0 #fff0, 0 0 #fff0, 0 0 #fff0;
+  }
+  12% {
+    box-shadow: 100px 0 #666, 0 0 #fff0, 0 0 #fff0, 0 0 #fff0;
+  }
+  25% {
+    box-shadow: 110px 0 #666, 100px 0 #666, 0 0 #fff0, 0 0 #fff0;
+  }
+  36% {
+    box-shadow: 120px 0 #666, 110px 0 #666, 100px 0 #666, 0 0 #fff0;
+  }
+  50% {
+    box-shadow: 130px 0 #666, 120px 0 #666, 110px 0 #666, 100px 0 #666;
+  }
+  62% {
+    box-shadow: 200px 0 #fff0, 130px 0 #666, 120px 0 #666, 110px 0 #666;
+  }
+  75% {
+    box-shadow: 200px 0 #fff0, 200px 0 #fff0, 130px 0 #666, 120px 0 #666;
+  }
+  87% {
+    box-shadow: 200px 0 #fff0, 200px 0 #fff0, 200px 0 #fff0, 130px 0 #666;
+  }
+  to {
+    box-shadow: 200px 0 #fff0, 200px 0 #fff0, 200px 0 #fff0, 200px 0 #fff0;
   }
 }
 </style>

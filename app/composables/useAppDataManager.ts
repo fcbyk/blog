@@ -1,6 +1,5 @@
 import type { Datas, DocumentId } from '~~/shared/types/database'
 import { DOCUMENT_IDS } from '~~/shared/types/database'
-import { DEFAULT_CONFIG } from '~~/shared/defaultConfig'
 import { api, ApiTimeoutError } from './useApi'
 
 const STORAGE_KEY = 'app-data-cache'
@@ -76,15 +75,13 @@ export function useAppDataManager() {
       }
       appStore.setError()
       
-      // 失败时尝试用缓存
+      // 失败时尝试用缓存兜底
       if (!appStore.isReady) {
         const cached = loadFromCache()
         if (cached) {
           appStore.setDatas(cached)
-        } else {
-          // 缓存也没有 → 用默认配置兜底
-          appStore.setDatas(DEFAULT_CONFIG)
         }
+        // 缓存也没有时保持错误状态，由 UI 展示错误并提供重试
       }
     } finally {
       appStore.setLoading(false)

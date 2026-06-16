@@ -1,31 +1,12 @@
 <script setup lang="ts">
-import { sleep } from '~~/shared/utils/time'
-
 const showSidebar = ref(false)
-const isAppReady = ref(false)
-const loadingBar = ref<{ startLoading: () => void; endLoading: () => void } | null>(null)
 const appDataManager = useAppDataManager()
 
-provide('isAppReady', isAppReady)
-
-onMounted(async () => {
-  try {
-    const startTime = Date.now()
-    loadingBar.value?.startLoading()
-    initToken()
-    await appDataManager.initDatas()
-
-    const elapsedTime = Date.now() - startTime
-    const minDisplayTime = 300
-    const additionalWait = elapsedTime < minDisplayTime ? minDisplayTime - elapsedTime : 120
-    await sleep(additionalWait)
-  } catch (err) {
-    console.error('全局初始化失败', err)
-  } finally {
-    loadingBar.value?.endLoading()
-    await sleep(180)
-    isAppReady.value = true
-  }
+onMounted(() => {
+  initToken()
+  // 后台加载配置数据，不阻塞页面渲染
+  // 各页面自行判断 appStore.isReady 决定加载状态
+  appDataManager.initDatas()
 })
 </script>
 
@@ -36,11 +17,9 @@ onMounted(async () => {
       <MobileSidebar v-model="showSidebar" />
     </ClientOnly>
     <NuxtPage
-      v-if="isAppReady"
       :page-key="(r) => (r.fullPath as string).startsWith('/blog') ? '/blog' : r.fullPath"
       :transition="{ name: 'page-pop', appear: true, mode: 'out-in' }"
     />
-    <LoadingBar ref="loadingBar" />
   </div>
 </template>
 

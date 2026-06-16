@@ -81,7 +81,7 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      include: ["dompurify", "nprogress"]
+      include: ["dompurify"]
     }
   }
 })

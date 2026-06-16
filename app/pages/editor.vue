@@ -5,6 +5,7 @@ import UrlMatching from '~/components/editor/UrlMatching.vue'
 import MenuSettings from '~/components/editor/MenuSettings.vue'
 
 const editorStore = useEditorStore()
+const appStore = useAppStore()
 
 // 处理关闭窗口，返回首页
 function handleClose() {
@@ -34,7 +35,7 @@ const currentPageComponent = computed(() => {
   <div class="h-full flex items-center justify-center p-0 mt-8">
     <!-- macOS 风格窗口 -->
     <main class="mac-window md:mb-4 relative z-1 w-full h-full md:w-[70%] md:h-[95%] rounded-none md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(92,61,43,0.2)] dark:shadow-none dark:border dark:border-[rgba(255,255,255,0.08)]">
-      <div class="flex w-full h-full bg-[rgba(255,250,244,0.92)] dark:bg-[#1a1c1e]/[0.92] backdrop-blur-md relative">
+      <div class="flex w-full h-full bg-[rgba(255,250,244,0.92)] dark:bg-[#1a1c1e]/92 backdrop-blur-md relative">
         <!-- macOS 风格窗口控制按钮 - 在移动端隐藏 -->
         <div class="absolute top-4 left-4 z-10 hidden md:block">
           <MacWindowControls 
@@ -76,7 +77,14 @@ const currentPageComponent = computed(() => {
 
         <!-- 右侧内容区域 -->
         <div class="flex-1 h-full bg-white dark:bg-[#181a1c] relative">
-          <component :is="currentPageComponent" />
+          <!-- 配置数据加载中 -->
+          <div v-if="!appStore.isReady" class="flex items-center justify-center h-full">
+            <div class="flex flex-col items-center gap-3">
+              <div class="w-6 h-6 border-2 border-[#ce8256] border-t-transparent rounded-full animate-spin" />
+              <span class="text-sm text-[#8f949a]">加载中...</span>
+            </div>
+          </div>
+          <component v-else :is="currentPageComponent" />
         </div>
       </div>
     </main>

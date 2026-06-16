@@ -3,16 +3,18 @@ const sender = useMessageSender()
 const appStore = useAppStore()
 const messageStore = useMessageStore()
 
-onMounted(async () => {
+// 配置数据就绪后再发送欢迎消息
+watch(() => appStore.isReady, (ready) => {
+  if (!ready) return
   try {
     const helloMsg = appStore.datas?.baseConfig.helloMsg || []
     if (helloMsg.length > 0 && messageStore.messages.length === 0) {
-      await sender.sendBatchAs(helloMsg, 'bot')
+      sender.sendBatchAs(helloMsg, 'bot')
     }
   } catch (err) {
     console.error('欢迎消息发送失败', err)
   }
-})
+}, { immediate: true })
 </script>
 
 <template>
