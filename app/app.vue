@@ -37,7 +37,7 @@ onMounted(async () => {
     </ClientOnly>
     <NuxtPage
       v-if="isAppReady"
-      :page-key="(r) => r.fullPath"
+      :page-key="(r) => (r.fullPath as string).startsWith('/blog') ? '/blog' : r.fullPath"
       :transition="{ name: 'page-pop', appear: true, mode: 'out-in' }"
     />
     <LoadingBar ref="loadingBar" />

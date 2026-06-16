@@ -1,7 +1,11 @@
 @import "tailwindcss";
+@import "highlight.js/styles/github.css";
 @custom-variant dark (&:where(.dark, .dark *));
 
 html {
+  /* 阻止 macOS 系统级橡皮筋效果 */
+  overscroll-behavior: none;
+
   /* 首屏强制暗色保底，防止闪屏 */
   background-color: #111315;
 

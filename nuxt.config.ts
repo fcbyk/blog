@@ -8,6 +8,7 @@ export default defineNuxtConfig({
   routeRules: {
     "/": { ssr: false },
     "/editor": { ssr: false },
+    "/blog/**": { ssr: false },
     "/q/*": { ssr: false }
   },
   colorMode: {

@@ -17,6 +17,40 @@ const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
 
 const isOnQAPage = computed(() => route.path.startsWith('/q/'))
+const isOnBlogPage = computed(() => route.path.startsWith('/blog'))
+
+// 博客文章树
+const { tree: blogTree, loading: blogTreeLoading, error: blogTreeError, fetchTree: fetchBlogTree } = useBlogTree()
+const blogExpandedFolders = ref<Set<string>>(new Set())
+
+// 文件夹展开/折叠
+function toggleBlogFolder(path: string) {
+  if (blogExpandedFolders.value.has(path)) {
+    blogExpandedFolders.value.delete(path)
+  } else {
+    blogExpandedFolders.value.add(path)
+  }
+}
+
+// 博客文章点击
+function handleBlogArticle(path: string) {
+  const clean = path.replace(/\.md$/, '')
+  handleClose()
+  navigateTo('/blog/' + clean)
+}
+
+// 监听侧边栏打开，加载博客目录
+watch(() => props.modelValue, async (val) => {
+  if (val && isOnBlogPage.value) {
+    await fetchBlogTree()
+    // 自动展开所有文件夹
+    for (const item of blogTree.value) {
+      if (item.type === 'folder') {
+        blogExpandedFolders.value.add(item.path)
+      }
+    }
+  }
+})
 
 // 检查是否已验证管理员权限
 const isAdminVerified = computed(() => {
@@ -114,6 +148,66 @@ const toggleTheme = () => {
             <IconHome />
             <span>Q&A</span>
           </NuxtLink>
+
+          <NuxtLink 
+            to="/blog"
+            class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors text-gray-700 dark:text-[#c7cbd1]"
+            @click="handleClose"
+          >
+            <IconBlog />
+            <span>Blog</span>
+          </NuxtLink>
+
+          <!-- 博客文章列表（仅 blog 页面显示） -->
+          <template v-if="isOnBlogPage && blogTreeError">
+            <div class="border-t border-gray-200 dark:border-[#2b2d30] my-1"></div>
+            <div class="flex flex-col items-center gap-2 px-4 py-3">
+              <span class="text-xs text-gray-400 dark:text-[#8f949a]">加载失败</span>
+              <button
+                class="px-3 py-1 rounded text-xs border-none cursor-pointer text-white bg-[#ce8256]"
+                @click="fetchBlogTree()"
+              >
+                重试
+              </button>
+            </div>
+          </template>
+          <template v-else-if="isOnBlogPage && !blogTreeLoading && blogTree.length > 0">
+            <div class="border-t border-gray-200 dark:border-[#2b2d30] my-1"></div>
+            <div class="px-3 py-1 text-xs font-medium text-gray-500 dark:text-[#8f949a] uppercase tracking-wider">
+              文章
+            </div>
+            <template v-for="item in blogTree" :key="item.path">
+              <!-- 文件夹 -->
+              <button
+                v-if="item.type === 'folder'"
+                class="w-full flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors text-gray-700 dark:text-[#c7cbd1] text-left border-none cursor-pointer text-sm"
+                @click="toggleBlogFolder(item.path)"
+              >
+                <span class="text-xs transition-transform shrink-0" :class="{ 'rotate-90': blogExpandedFolders.has(item.path) }">▶</span>
+                <span>{{ item.name }}</span>
+              </button>
+              <template v-if="item.type === 'folder' && blogExpandedFolders.has(item.path)">
+                <button
+                  v-for="child in item.children"
+                  :key="child.path"
+                  class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors text-gray-700 dark:text-[#c7cbd1] text-left border-none cursor-pointer text-sm"
+                  style="padding-left: 2.5rem"
+                  @click="handleBlogArticle(child.path)"
+                >
+                  <span>{{ child.name }}</span>
+                </button>
+              </template>
+
+              <!-- 根级文件 -->
+              <button
+                v-else-if="item.type === 'file'"
+                class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors text-gray-700 dark:text-[#c7cbd1] text-left border-none cursor-pointer text-sm"
+                @click="handleBlogArticle(item.path)"
+              >
+                <span>{{ item.name }}</span>
+              </button>
+            </template>
+          </template>
 
           <!-- 登录后显示编辑器页面切换 -->
           <template v-if="isAdminVerified">

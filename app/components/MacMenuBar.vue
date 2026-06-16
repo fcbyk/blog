@@ -111,7 +111,14 @@ onUnmounted(() => {
             <IconHome />
             <span>Q&A</span>
           </NuxtLink>
-          
+
+          <button
+            class="flex items-center space-x-3 w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="showMenu = false; navigateTo('/blog')"
+          >
+            <IconBlog />
+            <span>Blog</span>
+          </button>
 
           <NuxtLink
             v-if="isAdminVerified"
