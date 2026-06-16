@@ -6,8 +6,11 @@ const emit = defineEmits<{
   (e: 'openSidebar'): void
 }>()
 
+const route = useRoute()
 const showMenu = ref(false)
 const currentDateTime = ref('')
+
+const isOnQAPage = computed(() => route.path.startsWith('/q/'))
 
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 let timer: ReturnType<typeof setInterval> | null = null
@@ -101,7 +104,7 @@ onUnmounted(() => {
           @mouseleave="hideMenuWithDelay"
         >
           <NuxtLink
-            to="/"
+            :to="isOnQAPage ? route.fullPath : '/'"
             class="flex items-center space-x-3 px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors"
             @click="showMenu = false"
           >

@@ -11,9 +11,12 @@ const emit = defineEmits<{
 }>()
 
 const editorStore = useEditorStore()
+const route = useRoute()
 
 const colorMode = useColorMode()
 const isDark = computed(() => colorMode.value === 'dark')
+
+const isOnQAPage = computed(() => route.path.startsWith('/q/'))
 
 // 检查是否已验证管理员权限
 const isAdminVerified = computed(() => {
@@ -38,7 +41,6 @@ const handleNavigateToPage = (page: EditorPage) => {
   // 关闭侧边栏
   handleClose()
   // 如果当前不在编辑器页面，则跳转
-  const route = useRoute()
   if (route.path !== '/editor') {
     navigateTo('/editor')
   }
@@ -105,7 +107,7 @@ const toggleTheme = () => {
       <nav class="flex-1 overflow-y-auto py-4">
         <div class="px-4 space-y-2">
           <NuxtLink 
-            to="/" 
+            :to="isOnQAPage ? route.fullPath : '/'"
             class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors text-gray-700 dark:text-[#c7cbd1]"
             @click="handleClose"
           >
