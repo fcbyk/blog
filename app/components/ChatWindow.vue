@@ -22,11 +22,6 @@
               :clickable="false"
             />
           </div>
-          
-          <!-- 居中显示正在输入状态 -->
-          <div class="flex-1 text-center text-xs text-gray-600 dark:text-gray-400">
-            {{ messageStore.isTyping ? '正在输入...' : '' }}
-          </div>
         </div>
 
         <!-- 窗口内容区域 -->
