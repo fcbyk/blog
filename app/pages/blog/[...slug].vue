@@ -135,9 +135,9 @@ function handleClose() {
 <template>
   <div class="h-full w-full relative">
     <main
-      class="mac-window absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-1 w-full h-full md:w-[70%] md:h-[85%] md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(92,61,43,0.2)]"
+      class="mac-window absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-1 w-full h-full md:w-[70%] md:h-[85%] md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(92,61,43,0.2)] dark:shadow-none dark:border dark:border-[rgba(255,255,255,0.08)]"
     >
-      <div class="flex w-full h-full bg-[rgba(255,250,244,0.92)] backdrop-blur-md relative">
+      <div class="flex w-full h-full bg-[rgba(255,250,244,0.92)] dark:bg-[#1a1c1e]/[0.92] backdrop-blur-md relative">
         <!-- macOS 风格窗口控制按钮 + 侧边栏切换 -->
         <div class="absolute top-4 left-4 z-10 hidden md:flex items-center gap-2">
           <MacWindowControls
@@ -148,7 +148,7 @@ function handleClose() {
             @close="handleClose"
           />
           <button
-            class="ml-2 p-1 rounded-md border-none cursor-pointer text-[#6f4c39] hover:bg-[rgba(125,77,51,0.1)] transition-colors"
+            class="ml-2 p-1 rounded-md border-none cursor-pointer text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[rgba(125,77,51,0.1)] dark:hover:bg-[rgba(255,255,255,0.08)] transition-colors"
             :title="sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'"
             @click="sidebarCollapsed = !sidebarCollapsed"
           >
@@ -195,7 +195,7 @@ function handleClose() {
             <template v-for="item in tree" :key="item.path">
               <button
                 v-if="item.type === 'folder'"
-                class="flex items-center gap-1.5 w-full py-2 px-3 rounded-lg border-none cursor-pointer text-sm text-left font-normal text-[#6f4c39] hover:bg-[rgba(125,77,51,0.08)] transition-colors"
+                class="flex items-center gap-1.5 w-full py-2 px-3 rounded-lg border-none cursor-pointer text-sm text-left font-normal text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[rgba(125,77,51,0.08)] dark:hover:bg-[rgba(255,255,255,0.06)] transition-colors"
                 @click="toggleFolder(item.path)"
               >
                 <span class="text-xs transition-transform shrink-0" :class="{ 'rotate-90': expandedFolders.has(item.path) }">▶</span>
@@ -209,7 +209,7 @@ function handleClose() {
                     'block w-full py-2 px-3 rounded-lg border-none cursor-pointer text-sm text-left font-normal truncate transition-colors',
                     activePath === child.path
                       ? 'bg-[#ce8256] text-[#fff8f2]'
-                      : 'text-[#6f4c39] hover:bg-[rgba(125,77,51,0.1)]',
+                      : 'text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[rgba(125,77,51,0.1)] dark:hover:bg-[rgba(255,255,255,0.06)]',
                   ]"
                   @click="selectFile(child.path)"
                 >
@@ -223,7 +223,7 @@ function handleClose() {
                   'block w-full py-2.5 px-3.5 rounded-lg border-none cursor-pointer text-sm text-left font-normal truncate transition-colors',
                   activePath === item.path
                     ? 'bg-[#ce8256] text-[#fff8f2]'
-                    : 'text-[#6f4c39] hover:bg-[rgba(125,77,51,0.1)]',
+                    : 'text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[rgba(125,77,51,0.1)] dark:hover:bg-[rgba(255,255,255,0.06)]',
                 ]"
                 @click="selectFile(item.path)"
               >
@@ -234,7 +234,7 @@ function handleClose() {
         </nav>
 
         <!-- 右侧 md 内容区域 -->
-        <div ref="contentRef" class="flex-1 h-full bg-white relative overflow-y-auto" style="overscroll-behavior: none">
+        <div ref="contentRef" class="flex-1 h-full bg-white dark:bg-[#181a1c] relative overflow-y-auto" style="overscroll-behavior: none">
           <!-- 目录树加载失败 -->
           <div v-if="treeError" class="flex items-center justify-center h-full">
             <div class="flex flex-col items-center gap-4">
@@ -282,7 +282,7 @@ function handleClose() {
           <!-- 内容 -->
           <article
             v-else
-            class="max-w-none p-8 pb-16 md:p-12 md:pb-20"
+            class="md-content max-w-none p-8 pb-16 md:p-12 md:pb-20"
             v-html="renderedHtml"
             @click="handleContentClick"
           />
@@ -293,6 +293,7 @@ function handleClose() {
 </template>
 
 <style scoped>
+/* ========== 亮色模式 ========== */
 :deep(pre) {
   border-radius: 0.5rem;
   overflow-x: auto;

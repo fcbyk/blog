@@ -7,6 +7,7 @@ function getMd(): MarkdownIt {
   if (md) return md
 
   md = new MarkdownIt({
+    langPrefix: 'hljs language-',
     html: true,
     linkify: true,
     typographer: true,

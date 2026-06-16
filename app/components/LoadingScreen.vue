@@ -33,6 +33,10 @@ withDefaults(defineProps<{
   display: inline-block;
 }
 
+.dark .loader-container {
+  background: #111315;
+}
+
 .loader span {
   animation: cut 2s infinite;
   transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);

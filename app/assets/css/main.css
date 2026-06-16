@@ -2,6 +2,201 @@
 @import "highlight.js/styles/github.css";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ============================== */
+/* 暗色模式：代码高亮覆盖        */
+/* ============================== */
+.dark .hljs {
+  background: #1e2023;
+  color: #e6edf3;
+}
+
+/* base — default foreground */
+.dark .hljs-subst,
+.dark .hljs-punctuation,
+.dark .hljs-operator,
+.dark .hljs-params,
+.dark .hljs-property,
+.dark .hljs-bullet {
+  color: #e6edf3;
+}
+
+/* keyword */
+.dark .hljs-doctag,
+.dark .hljs-keyword,
+.dark .hljs-meta .hljs-keyword,
+.dark .hljs-template-tag,
+.dark .hljs-template-variable,
+.dark .hljs-type,
+.dark .hljs-variable.language_ {
+  color: #f0883e;
+}
+
+/* entity / title / function */
+.dark .hljs-title,
+.dark .hljs-title.class_,
+.dark .hljs-title.class_.inherited__,
+.dark .hljs-title.function_,
+.dark .hljs-function .hljs-title,
+.dark .hljs-class .hljs-title {
+  color: #d2a8ff;
+}
+
+/* constant */
+.dark .hljs-attr,
+.dark .hljs-attribute,
+.dark .hljs-literal,
+.dark .hljs-number,
+.dark .hljs-variable,
+.dark .hljs-variable.constant_,
+.dark .hljs-selector-attr,
+.dark .hljs-selector-class,
+.dark .hljs-selector-id {
+  color: #79c0ff;
+}
+
+/* string */
+.dark .hljs-regexp,
+.dark .hljs-string,
+.dark .hljs-meta .hljs-string,
+.dark .hljs-code {
+  color: #a5d6ff;
+}
+
+/* built-in / symbol */
+.dark .hljs-built_in,
+.dark .hljs-symbol {
+  color: #ffa657;
+}
+
+/* comment */
+.dark .hljs-comment,
+.dark .hljs-quote,
+.dark .hljs-formula {
+  color: #6a737d;
+}
+
+/* name / selector tag */
+.dark .hljs-name,
+.dark .hljs-selector-tag,
+.dark .hljs-selector-pseudo {
+  color: #7ee787;
+}
+
+/* section */
+.dark .hljs-section {
+  color: #79c0ff;
+  font-weight: bold;
+}
+
+/* meta */
+.dark .hljs-meta {
+  color: #6a737d;
+}
+
+/* tag */
+.dark .hljs-tag {
+  color: #6a737d;
+}
+
+/* addition / deletion */
+.dark .hljs-addition {
+  color: #3fb950;
+  background-color: #12261e;
+}
+.dark .hljs-deletion {
+  color: #f85149;
+  background-color: #261216;
+}
+
+/* emphasis / strong */
+.dark .hljs-emphasis {
+  color: #e6edf3;
+  font-style: italic;
+}
+.dark .hljs-strong {
+  color: #e6edf3;
+  font-weight: bold;
+}
+
+/* link / char escape */
+.dark .hljs-link,
+.dark .hljs-char.escape_ {
+  color: #79c0ff;
+}
+
+/* meta keyword bold */
+.dark .hljs-meta .hljs-keyword,
+.dark .hljs-meta-keyword {
+  font-weight: bold;
+}
+
+/* ============================== */
+/* 暗色模式：博客 MD 内容渲染    */
+/* ============================== */
+.dark .md-content pre {
+  background: #1e2023;
+  border-color: #2b2d30;
+}
+
+.dark .md-content code {
+  background: #2b2d30;
+  color: #e0e0e0;
+}
+
+.dark .md-content pre code {
+  background: transparent;
+}
+
+.dark .md-content th,
+.dark .md-content td {
+  border-color: #2b2d30;
+}
+
+.dark .md-content th {
+  background: #1f2123;
+  color: #ebedf0;
+}
+
+.dark .md-content td {
+  color: #c7cbd1;
+}
+
+.dark .md-content blockquote {
+  background: #1f2023;
+  color: #c7cbd1;
+}
+
+.dark .md-content a:hover {
+  color: #d4955e;
+}
+
+.dark .md-content h1 { color: #ebedf0; }
+.dark .md-content h2 { color: #e8e8e8; }
+.dark .md-content h3 { color: #e0e0e0; }
+.dark .md-content h4,
+.dark .md-content h5,
+.dark .md-content h6 { color: #d8d8d8; }
+
+.dark .md-content p,
+.dark .md-content li {
+  color: #c7cbd1;
+}
+
+.dark .md-content hr {
+  border-color: #2b2d30;
+}
+
+.dark .md-content strong,
+.dark .md-content b {
+  color: #ebedf0;
+}
+
+.dark .md-content em,
+.dark .md-content i {
+  color: #d0d0d0;
+}
+
+
 html {
   /* 阻止 macOS 系统级橡皮筋效果 */
   overscroll-behavior: none;

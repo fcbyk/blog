@@ -205,7 +205,7 @@ function confirmRename() {
     <Transition name="fade">
       <div v-if="modelValue" class="fixed inset-0 bg-black/50 flex items-center justify-center z-99999">
         <Transition name="dialog">
-          <div v-if="modelValue" class="bg-white rounded-2xl w-[90%] max-w-3xl max-h-[80vh] flex flex-col shadow-xl">
+          <div v-if="modelValue" class="bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-3xl max-h-[80vh] flex flex-col shadow-xl">
             <!-- 标题栏 -->
             <div class="flex justify-between items-center px-6 py-4 border-b-2 border-[#f0e6dd]">
               <!-- 左侧：macOS 风格关闭按钮 -->
@@ -220,14 +220,14 @@ function confirmRename() {
               
               <!-- 中间：标题 -->
               <h3 
-                class="text-lg text-[#32241b] m-0 font-semibold flex items-center gap-2 transition-colors duration-200"
+                class="text-lg text-[#32241b] dark:text-[#ebedf0] m-0 font-semibold flex items-center gap-2 transition-colors duration-200"
                 :class="{ 'cursor-pointer hover:text-[#ce8256]': props.editable }"
                 @click="openRenameDialog" 
                 :title="props.editable ? `点击修改${props.keywordLabel}` : ''"
               >
                 {{ props.title || keyword }}
                 <span v-if="props.editable" class="text-sm opacity-60 transition-all duration-200 hover:opacity-100 hover:scale-110" :title="`点击修改${props.keywordLabel}`">✏️</span>
-                <span class="text-sm text-[#9d6547] font-medium">({{ messages.length }} 条消息)</span>
+                <span class="text-sm text-[#9d6547] dark:text-[#a09080] font-medium">({{ messages.length }} 条消息)</span>
               </h3>
               
               <!-- 右侧：占位元素 -->
@@ -237,7 +237,7 @@ function confirmRename() {
             <!-- 内容区域 -->
             <div class="px-6 py-6 overflow-y-auto flex-1 min-h-0">
               <!-- 空状态 -->
-              <div v-if="messages.length === 0" class="text-center py-7.5 px-5 text-[#9d6547]">
+              <div v-if="messages.length === 0" class="text-center py-7.5 px-5 text-[#9d6547] dark:text-[#a09080]">
                 <p class="text-sm m-0">暂无{{ actionLabel }}消息，点击下方按钮添加</p>
               </div>
 
@@ -246,7 +246,7 @@ function confirmRename() {
                 <div 
                   v-for="(msg, index) in messages" 
                   :key="index"
-                  class="message-card bg-[#fafafa] border-2 border-[#f0e6dd] rounded-lg p-3 transition-all duration-300 ease-in-out cursor-grab relative"
+                  class="message-card bg-[#fafafa] dark:bg-[#1f2123] border-2 border-[#f0e6dd] dark:border-[#2b2d30] rounded-lg p-3 transition-all duration-300 ease-in-out cursor-grab relative"
                   :class="{ 
                     'dragging': dragIndex === index,
                     'drag-over': dragOverIndex === index
@@ -270,7 +270,7 @@ function confirmRename() {
                     </div>
                   </div>
                   
-                  <div class="text-sm text-[#32241b] mb-1.5 wrap-break-word">
+                  <div class="text-sm text-[#32241b] dark:text-[#c7cbd1] mb-1.5 wrap-break-word">
                     <span v-if="msg.type === 'text' || msg.type === 'html'">{{ String(msg.content).substring(0, 50) }}{{ String(msg.content).length > 50 ? '...' : '' }}</span>
                     <span v-else-if="['image', 'audio', 'video', 'music'].includes(msg.type)">{{ String(msg.content) }}</span>
                     <span v-else-if="msg.type === 'file'">📄 {{ (msg.content as any)?.fileName || '文件' }}</span>
@@ -305,9 +305,9 @@ function confirmRename() {
     <Transition name="fade">
       <div v-if="showRenameDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-99999">
         <Transition name="dialog">
-          <div v-if="showRenameDialog" class="bg-white rounded-2xl w-[90%] max-w-md shadow-xl">
+          <div v-if="showRenameDialog" class="bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-md shadow-xl">
             <!-- 标题栏 -->
-            <div class="flex justify-between items-center px-6 py-4 border-b-2 border-[#f0e6dd]">
+            <div class="flex justify-between items-center px-6 py-4 border-b-2 border-[#f0e6dd] dark:border-[#2b2d30]">
               <MacWindowControls 
                 :show-close="true"
                 :show-minimize="false"
@@ -316,17 +316,17 @@ function confirmRename() {
                 close-title="关闭"
                 @close="closeRenameDialog"
               />
-              <h3 class="text-lg text-[#32241b] m-0 font-semibold">修改{{ props.keywordLabel }}</h3>
+              <h3 class="text-lg text-[#32241b] dark:text-[#ebedf0] m-0 font-semibold">修改{{ props.keywordLabel }}</h3>
               <div class="w-8"></div>
             </div>
             
             <div class="px-6 py-6">
               <div class="mb-4">
-                <label class="block text-sm text-[#7a5a48] mb-1.5 font-medium">原{{ props.keywordLabel }}：</label>
-                <span class="inline-block px-3 py-2 bg-[#f5f5f5] rounded-md text-[#6f4c39] text-sm font-medium">{{ keyword }}</span>
+                <label class="block text-sm text-[#7a5a48] dark:text-[#a0a5ab] mb-1.5 font-medium">原{{ props.keywordLabel }}：</label>
+                <span class="inline-block px-3 py-2 bg-[#f5f5f5] dark:bg-[#2b2d30] rounded-md text-[#6f4c39] dark:text-[#c7cbd1] text-sm font-medium">{{ keyword }}</span>
               </div>
               <div>
-                <label class="block text-sm text-[#7a5a48] mb-1.5 font-medium" for="new-keyword-name">新{{ props.keywordLabel }}：</label>
+                <label class="block text-sm text-[#7a5a48] dark:text-[#a0a5ab] mb-1.5 font-medium" for="new-keyword-name">新{{ props.keywordLabel }}：</label>
                 <input 
                   id="new-keyword-name"
                   type="text" 
@@ -334,13 +334,13 @@ function confirmRename() {
                   :placeholder="`请输入新${props.keywordLabel}...`"
                   @keyup.enter="confirmRename"
                   autofocus
-                  class="w-full px-3.5 py-2.5 border-2 border-[#e8ddd3] rounded-lg text-sm transition-all duration-200 bg-white focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)]"
+                  class="w-full px-3.5 py-2.5 border-2 border-[#e8ddd3] dark:border-[#3a3c3f] rounded-lg text-sm transition-all duration-200 bg-white dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)]"
                 >
               </div>
             </div>
             
-            <div class="flex gap-3 px-6 py-4 border-t-2 border-[#f0e6dd]">
-              <button class="flex-1 px-5 py-2.5 border-none rounded-xl text-sm cursor-pointer transition-all duration-200 font-medium bg-[#f5f5f5] text-[#6f4c39] hover:bg-[#e0e0e0]" @click="closeRenameDialog">取消</button>
+            <div class="flex gap-3 px-6 py-4 border-t-2 border-[#f0e6dd] dark:border-[#2b2d30]">
+              <button class="flex-1 px-5 py-2.5 border-none rounded-xl text-sm cursor-pointer transition-all duration-200 font-medium bg-[#f5f5f5] dark:bg-[#2b2d30] text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[#e0e0e0] dark:hover:bg-[#3a3c3f]" @click="closeRenameDialog">取消</button>
               <button class="flex-1 px-5 py-2.5 border-none rounded-xl text-sm cursor-pointer transition-all duration-200 font-medium bg-[#ce8256] text-[#fff8f2] hover:bg-[#b8714a]" @click="confirmRename">确定</button>
             </div>
           </div>

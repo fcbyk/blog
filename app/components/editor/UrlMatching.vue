@@ -242,7 +242,7 @@ const itemsCount = computed(() => Object.keys(items.value).length)
         placeholder="输入参数名（如：welcome、promo）..."
         :disabled="loading || saving"
         @keydown="handleKeydown"
-        class="flex-1 py-2.5 px-3.5 border-2 border-[#e8ddd3] rounded-lg text-sm transition-all duration-200 bg-white focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)] disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-[#f5f5f5]"
+        class="flex-1 py-2.5 px-3.5 border-2 border-[#e8ddd3] dark:border-[#3a3c3f] rounded-lg text-sm transition-all duration-200 bg-white dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)] disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-[#f5f5f5] dark:disabled:bg-[#2b2d30]"
       >
       <button 
         class="py-2.5 px-5 border-none rounded-lg bg-[#ce8256] text-[#fff8f2] text-sm cursor-pointer transition-all duration-200 font-medium whitespace-nowrap hover:bg-[#b8714a] hover:-translate-y-0.5 hover:shadow-[0_4px_12px_rgba(206,130,86,0.3)] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed" 
@@ -255,18 +255,18 @@ const itemsCount = computed(() => Object.keys(items.value).length)
 
     <!-- 帮助信息 -->
     <transition name="help-slide">
-      <div v-if="showHelp" class="mb-5 p-3 md:p-4 md:px-5 bg-[rgba(206,130,86,0.08)] border-l-4 border-[#ce8256] rounded-lg">
-        <p class="mb-2 mt-0 text-xs md:text-sm text-[#6f4c39] leading-relaxed">💡 <strong class="text-[#b8714a] font-semibold">使用说明：</strong>当用户访问带有指定 URL 参数的页面时，会自动发送配置的消息。</p>
-        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] mb-0 text-xs md:text-sm text-[#6f4c39] leading-relaxed">例如：配置参数 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] font-medium">welcome</code> 后，访问 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] font-medium break-all">https://fcbyk.me/?welcome</code> 或 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] font-medium">?welcome=任意值</code> 都会触发该参数对应的消息。</p>
-        <p class="mt-2 text-[11px] md:text-[13px] text-[#9d6547] mb-0">📌 提示：如果消息内容匹配关键词，还会自动触发关键词回复。</p>
+      <div v-if="showHelp" class="mb-5 p-3 md:p-4 md:px-5 bg-[rgba(206,130,86,0.08)] dark:bg-[rgba(206,130,86,0.06)] border-l-4 border-[#ce8256] rounded-lg">
+        <p class="mb-2 mt-0 text-xs md:text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed">💡 <strong class="text-[#b8714a] dark:text-[#d4955e] font-semibold">使用说明：</strong>当用户访问带有指定 URL 参数的页面时，会自动发送配置的消息。</p>
+        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] dark:border-[rgba(206,130,86,0.15)] mb-0 text-xs md:text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed">例如：配置参数 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] dark:text-[#d4955e] font-medium">welcome</code> 后，访问 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] dark:text-[#d4955e] font-medium break-all">https://fcbyk.me/?welcome</code> 或 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] dark:text-[#d4955e] font-medium">?welcome=任意值</code> 都会触发该参数对应的消息。</p>
+        <p class="mt-2 text-[11px] md:text-[13px] text-[#9d6547] dark:text-[#a09080] mb-0">📌 提示：如果消息内容匹配关键词，还会自动触发关键词回复。</p>
       </div>
     </transition>
 
     <!-- 空状态 -->
-    <div v-if="itemsCount === 0" class="text-center py-15 px-5 text-[#9d6547]">
+    <div v-if="itemsCount === 0" class="text-center py-15 px-5 text-[#9d6547] dark:text-[#a09080]">
       <div class="text-5xl mb-4 opacity-60">📭</div>
       <p class="m-0 text-[15px]">暂无 URL 配置</p>
-      <p class="mt-2 text-[13px] text-[#b89a85]">添加第一个参数开始配置吧！</p>
+      <p class="mt-2 text-[13px] text-[#b89a85] dark:text-[#8b8b8b]">添加第一个参数开始配置吧！</p>
     </div>
 
     <!-- 项列表 -->
@@ -337,6 +337,10 @@ const itemsCount = computed(() => Object.keys(items.value).length)
   font-weight: 500;
 }
 
+.dark .card-title {
+  color: #c0a090;
+}
+
 .panel-card {
   margin: 0;
   padding: 24px 32px 32px;
@@ -346,6 +350,10 @@ const itemsCount = computed(() => Object.keys(items.value).length)
   box-shadow: none;
   overflow-y: auto;
   height: 100%;
+}
+
+.dark .panel-card {
+  background: #1a1c1e;
 }
 
 /* 移动端优化 */
@@ -382,6 +390,11 @@ const itemsCount = computed(() => Object.keys(items.value).length)
   color: #8d563d;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.dark .card-pill {
+  background: #2b2d30;
+  color: #c0a090;
 }
 
 /* 消息提示滑入动画 */

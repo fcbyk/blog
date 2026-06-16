@@ -212,11 +212,11 @@ function handleKeydown(event: KeyboardEvent) {
         <Transition name="dialog">
           <div 
             v-if="modelValue" 
-            class="bg-white rounded-2xl w-[90%] max-w-2xl max-h-[85vh] flex flex-col shadow-xl"
+            class="bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-2xl max-h-[85vh] flex flex-col shadow-xl"
             @keydown="handleKeydown"
             tabindex="-1"
           >
-            <div class="flex justify-between items-center px-6 py-4 border-b-2 border-[#f0e6dd]">
+            <div class="flex justify-between items-center px-6 py-4 border-b-2 border-[#f0e6dd] dark:border-[#2b2d30]">
               <!-- 左侧：macOS 风格关闭按钮 -->
               <MacWindowControls 
                 :show-close="true"
@@ -228,7 +228,7 @@ function handleKeydown(event: KeyboardEvent) {
               />
                     
               <!-- 右侧：标题 -->
-              <h3 class="text-lg text-[#32241b] m-0 font-semibold">{{ message ? '编辑消息' : '添加消息' }}</h3>
+              <h3 class="text-lg text-[#32241b] dark:text-[#ebedf0] m-0 font-semibold">{{ message ? '编辑消息' : '添加消息' }}</h3>
                     
               <!-- 占位元素，保持标题居中 -->
               <div class="w-8"></div>
@@ -237,11 +237,11 @@ function handleKeydown(event: KeyboardEvent) {
             <div class="px-6 py-6 overflow-y-auto flex-1 min-h-0">
               <!-- 角色选择 -->
               <div class="mb-5 last:mb-0">
-                <label class="block text-sm text-[#7a5a48] mb-1.5 font-medium">角色</label>
+                <label class="block text-sm text-[#7a5a48] dark:text-[#a0a5ab] mb-1.5 font-medium">角色</label>
                 <select 
                   v-model="editingMessage.role"
                   :disabled="!props.editableRole"
-                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm type-select focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)] disabled:bg-[#f5f5f5] disabled:text-gray-400 disabled:cursor-not-allowed"
+                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm type-select focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)] disabled:bg-[#f5f5f5] dark:disabled:bg-[#2b2d30] disabled:text-gray-400 disabled:cursor-not-allowed"
                 >
                   <option 
                     v-for="opt in roleOptions" 
@@ -251,15 +251,15 @@ function handleKeydown(event: KeyboardEvent) {
                     {{ opt.label }}
                   </option>
                 </select>
-                <p v-if="!props.editableRole" class="text-xs text-[#9d6547] mt-1 mb-0">💡 回复消息的角色固定为机器人</p>
+                <p v-if="!props.editableRole" class="text-xs text-[#9d6547] dark:text-[#a09080] mt-1 mb-0">💡 回复消息的角色固定为机器人</p>
               </div>
 
               <!-- 消息类型 -->
               <div class="mb-5 last:mb-0">
-                <label class="block text-sm text-[#7a5a48] mb-1.5 font-medium">消息类型</label>
+                <label class="block text-sm text-[#7a5a48] dark:text-[#a0a5ab] mb-1.5 font-medium">消息类型</label>
                 <select 
                   v-model="editingMessage.type"
-                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm type-select focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm type-select focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                 >
                   <option 
                     v-for="opt in messageTypeOptions" 
@@ -273,7 +273,7 @@ function handleKeydown(event: KeyboardEvent) {
 
               <!-- 内容区域 -->
               <div class="mb-5 last:mb-0">
-                <label class="block text-sm text-[#7a5a48] mb-1.5 font-medium">内容</label>
+                <label class="block text-sm text-[#7a5a48] dark:text-[#a0a5ab] mb-1.5 font-medium">内容</label>
                 
                 <!-- 文本/HTML 类型 -->
                 <textarea 
@@ -282,7 +282,7 @@ function handleKeydown(event: KeyboardEvent) {
                   @input="(e: Event) => updateField('content', (e.target as HTMLTextAreaElement).value)"
                   placeholder="输入内容..."
                   rows="4"
-                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm resize-y min-h-20 focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm resize-y min-h-20 focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                 ></textarea>
                 
                 <!-- 图片类型 - 仅支持 URL -->
@@ -292,7 +292,7 @@ function handleKeydown(event: KeyboardEvent) {
                     @input="(e: Event) => updateField('content', (e.target as HTMLInputElement).value)"
                     type="text"
                     placeholder="输入图片URL地址..."
-                    class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                    class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                   />
                   <!-- 图片预览 -->
                   <div v-if="editingMessage.content" class="mt-3">
@@ -312,49 +312,49 @@ function handleKeydown(event: KeyboardEvent) {
                   @input="(e: Event) => updateField('content', (e.target as HTMLInputElement).value)"
                   type="text"
                   placeholder="输入URL地址..."
-                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                 />
                 
                 <!-- 文件类型 -->
                 <div v-else-if="editingMessage.type === 'file'" class="flex flex-col gap-3">
                   <div class="flex flex-col gap-1">
-                    <label class="text-xs text-[#7a5a48] font-medium">文件名</label>
+                    <label class="text-xs text-[#7a5a48] dark:text-[#a0a5ab] font-medium">文件名</label>
                     <input 
                       :value="getContentField('fileName')"
                       @input="updateFileField('fileName', ($event.target as HTMLInputElement).value)"
                       type="text"
                       placeholder="例如：document.pdf"
-                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-xs text-[#7a5a48] font-medium">文件大小</label>
+                    <label class="text-xs text-[#7a5a48] dark:text-[#a0a5ab] font-medium">文件大小</label>
                     <input 
                       :value="getContentField('fileSize')"
                       @input="updateFileField('fileSize', ($event.target as HTMLInputElement).value)"
                       type="text"
                       placeholder="例如：2.5MB"
-                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-xs text-[#7a5a48] font-medium">文件类型</label>
+                    <label class="text-xs text-[#7a5a48] dark:text-[#a0a5ab] font-medium">文件类型</label>
                     <input 
                       :value="getContentField('fileType')"
                       @input="updateFileField('fileType', ($event.target as HTMLInputElement).value)"
                       type="text"
                       placeholder="例如：PDF文档"
-                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-xs text-[#7a5a48] font-medium">文件URL</label>
+                    <label class="text-xs text-[#7a5a48] dark:text-[#a0a5ab] font-medium">文件URL</label>
                     <input 
                       :value="getContentField('fileUrl')"
                       @input="updateFileField('fileUrl', ($event.target as HTMLInputElement).value)"
                       type="text"
                       placeholder="https://example.com/file.pdf"
-                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                     />
                   </div>
                 </div>
@@ -362,43 +362,43 @@ function handleKeydown(event: KeyboardEvent) {
                 <!-- 导航类型 -->
                 <div v-else-if="editingMessage.type === 'nav'" class="flex flex-col gap-3">
                   <div class="flex flex-col gap-1">
-                    <label class="text-xs text-[#7a5a48] font-medium">标题</label>
+                    <label class="text-xs text-[#7a5a48] dark:text-[#a0a5ab] font-medium">标题</label>
                     <input 
                       :value="getContentField('title')"
                       @input="updateNavField('title', ($event.target as HTMLInputElement).value)"
                       type="text"
                       placeholder="网站标题"
-                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-xs text-[#7a5a48] font-medium">链接</label>
+                    <label class="text-xs text-[#7a5a48] dark:text-[#a0a5ab] font-medium">链接</label>
                     <input 
                       :value="getContentField('link')"
                       @input="updateNavField('link', ($event.target as HTMLInputElement).value)"
                       type="text"
                       placeholder="https://example.com"
-                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-xs text-[#7a5a48] font-medium">描述（可选）</label>
+                    <label class="text-xs text-[#7a5a48] dark:text-[#a0a5ab] font-medium">描述（可选）</label>
                     <input 
                       :value="getContentField('desc')"
                       @input="updateNavField('desc', ($event.target as HTMLInputElement).value)"
                       type="text"
                       placeholder="简短描述"
-                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-xs text-[#7a5a48] font-medium">图标URL（可选）</label>
+                    <label class="text-xs text-[#7a5a48] dark:text-[#a0a5ab] font-medium">图标URL（可选）</label>
                     <input 
                       :value="getContentField('icon')"
                       @input="updateNavField('icon', ($event.target as HTMLInputElement).value)"
                       type="text"
                       placeholder="https://example.com/icon.png"
-                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                      class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                     />
                   </div>
                 </div>
@@ -407,7 +407,7 @@ function handleKeydown(event: KeyboardEvent) {
               <!-- 加载时间（仅机器人消息可设置） -->
               <div v-if="showLoadingTime && editingMessage.role === 'bot'" class="mb-5 last:mb-0">
                 <div class="flex justify-between items-center mb-1.5">
-                  <label class="block text-sm text-[#7a5a48] font-medium">加载时间（毫秒）</label>
+                  <label class="block text-sm text-[#7a5a48] dark:text-[#a0a5ab] font-medium">加载时间（毫秒）</label>
                   <label class="flex items-center gap-2 cursor-pointer select-none">
                     <input 
                       type="checkbox" 
@@ -415,7 +415,19 @@ function handleKeydown(event: KeyboardEvent) {
                       @change="(e: Event) => toggleCustomLoadingTime((e.target as HTMLInputElement).checked)"
                       class="hidden"
                     />
-                    <span class="relative w-11 h-6 bg-[#e8ddd3] rounded-xl transition-all duration-300 ease before:content-[''] before:absolute before:h-4.5 before:w-4.5 before:left-0.75 before:bottom-0.75 before:bg-white before:rounded-full before:transition-all before:duration-300 before:ease before:shadow-[0_2px_4px_rgba(0,0,0,0.2)] has-checked:bg-[#ce8256] has-checked:before:translate-x-5"></span>
+                    <span 
+                      :class="[
+                        'relative w-11 h-6 rounded-xl transition-all duration-300 ease',
+                        useCustomLoadingTime ? 'bg-[#ce8256]' : 'bg-[#e8ddd3]'
+                      ]"
+                    >
+                      <span 
+                        :class="[
+                          'absolute h-4.5 w-4.5 bottom-0.75 rounded-full transition-all duration-300 ease bg-white shadow-[0_2px_4px_rgba(0,0,0,0.2)]',
+                          useCustomLoadingTime ? 'translate-x-5 left-0.75' : 'left-0.75'
+                        ]"
+                      />
+                    </span>
                     <span class="text-xs text-[#7a5a48] font-medium">{{ useCustomLoadingTime ? '自定义' : '使用默认值' }}</span>
                   </label>
                 </div>
@@ -426,15 +438,15 @@ function handleKeydown(event: KeyboardEvent) {
                   min="0"
                   max="10000"
                   step="100"
-                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 rounded-2xl bg-[#fffdf9] text-[#32241b] outline-none text-sm disabled:bg-[#f5f5f5] disabled:text-gray-400 disabled:cursor-not-allowed focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
+                  class="w-full px-3.5 py-3.5 border border-[#e8ddd3]/60 dark:border-[#3a3c3f]/60 rounded-2xl bg-[#fffdf9] dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] outline-none text-sm disabled:bg-[#f5f5f5] dark:disabled:bg-[#2b2d30] disabled:text-gray-400 dark:disabled:text-[#6b7076] disabled:cursor-not-allowed focus:border-[#cb7d52] focus:shadow-[0_0_0_4px_rgba(203,125,82,0.12)]"
                   :disabled="!useCustomLoadingTime"
                   :placeholder="useCustomLoadingTime ? '' : '500ms-1000ms随机值'"
                 />
-                <p class="text-xs text-[#9d6547] mt-1 mb-0">消息显示前的等待时间</p>
+                <p class="text-xs text-[#9d6547] dark:text-[#a09080] mt-1 mb-0">消息显示前的等待时间</p>
               </div>
             </div>
 
-            <div class="flex gap-3 px-6 py-4 border-t-2 border-[#f0e6dd]">
+            <div class="flex gap-3 px-6 py-4 border-t-2 border-[#f0e6dd] dark:border-[#2b2d30]">
               <button 
                 class="flex-1 px-5 py-2.5 border-none rounded-2xl text-sm cursor-pointer transition-all duration-200 ease font-medium preset-btn" 
                 @click="handleClose"
@@ -502,6 +514,11 @@ function handleKeydown(event: KeyboardEvent) {
   color: #6e4a37;
   cursor: pointer;
   transition: 180ms ease;
+}
+
+.dark .preset-btn {
+  background: #2b2d30;
+  color: #c7cbd1;
 }
 
 .preset-btn.active,

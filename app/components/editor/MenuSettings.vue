@@ -585,10 +585,10 @@ const editingMessages = computed(() => {
 
     <!-- 帮助信息 -->
     <transition name="help-slide">
-      <div v-if="showHelp" class="mb-5 p-4 px-5 bg-[rgba(206,130,86,0.08)] border-l-4 border-[#ce8256] rounded-lg">
-        <p class="mb-2 mt-0 text-sm text-[#6f4c39] leading-relaxed">💡 <strong class="text-[#b8714a] font-semibold">使用说明：</strong>快捷菜单会在聊天界面底部显示，用户可以快速点击发送预设的消息。</p>
-        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] mb-0 text-sm text-[#6f4c39] leading-relaxed">支持两种类型：<strong class="text-[#b8714a] font-semibold">扁平菜单项</strong>（直接发送消息）和<strong class="text-[#b8714a] font-semibold">分组菜单项</strong>（包含多个子菜单）。</p>
-        <p class="mt-2 text-[13px] text-[#9d6547] mb-0">📌 提示：点击菜单项可以编辑其内容，点击 × 按钮可以删除。</p>
+      <div v-if="showHelp" class="mb-5 p-4 px-5 bg-[rgba(206,130,86,0.08)] dark:bg-[rgba(206,130,86,0.06)] border-l-4 border-[#ce8256] rounded-lg">
+        <p class="mb-2 mt-0 text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed">💡 <strong class="text-[#b8714a] dark:text-[#d4955e] font-semibold">使用说明：</strong>快捷菜单会在聊天界面底部显示，用户可以快速点击发送预设的消息。</p>
+        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] dark:border-[rgba(206,130,86,0.15)] mb-0 text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed">支持两种类型：<strong class="text-[#b8714a] dark:text-[#d4955e] font-semibold">扁平菜单项</strong>（直接发送消息）和<strong class="text-[#b8714a] dark:text-[#d4955e] font-semibold">分组菜单项</strong>（包含多个子菜单）。</p>
+        <p class="mt-2 text-[13px] text-[#9d6547] dark:text-[#a09080] mb-0">📌 提示：点击菜单项可以编辑其内容，点击 × 按钮可以删除。</p>
       </div>
     </transition>
 
@@ -604,10 +604,10 @@ const editingMessages = computed(() => {
     </div>
 
     <!-- 空状态 -->
-    <div v-if="itemsCount === 0" class="text-center py-15 px-5 text-[#9d6547]">
+    <div v-if="itemsCount === 0" class="text-center py-15 px-5 text-[#9d6547] dark:text-[#a09080]">
       <div class="text-5xl mb-4 opacity-60">📭</div>
       <p class="m-0 text-[15px]">暂无菜单配置</p>
-      <p class="mt-2 text-[13px] text-[#b89a85]">添加第一个菜单项开始配置吧！</p>
+      <p class="mt-2 text-[13px] text-[#b89a85] dark:text-[#8b8b8b]">添加第一个菜单项开始配置吧！</p>
     </div>
 
     <!-- 菜单列表 -->
@@ -622,15 +622,15 @@ const editingMessages = computed(() => {
         @drop="handleDrop(index)"
         @dragend="handleDragEnd"
         :class="[
-          'bg-[#fafafa] border-2 rounded-xl p-3 md:p-4 transition-all duration-200 cursor-move',
-          draggingIndex === index ? 'opacity-50 border-[#ce8256] bg-[#fff8f5]' : '',
-          dragOverIndex === index && draggingIndex !== index ? 'border-[#ce8256] bg-[#fff8f5] shadow-[0_4px_12px_rgba(206,130,86,0.2)] scale-[1.02]' : 'border-[#f0e6dd] hover:border-[#ce8256] hover:bg-[#fff8f5] hover:shadow-[0_4px_12px_rgba(206,130,86,0.1)]'
+          'bg-[#fafafa] dark:bg-[#1f2123] border-2 rounded-xl p-3 md:p-4 transition-all duration-200 cursor-move',
+          draggingIndex === index ? 'opacity-50 border-[#ce8256] bg-[#fff8f5] dark:bg-[#2a221e]' : '',
+          dragOverIndex === index && draggingIndex !== index ? 'border-[#ce8256] bg-[#fff8f5] dark:bg-[#2a221e] shadow-[0_4px_12px_rgba(206,130,86,0.2)] scale-[1.02]' : 'border-[#f0e6dd] dark:border-[#2b2d30] hover:border-[#ce8256] hover:bg-[#fff8f5] dark:hover:bg-[#2a221e] hover:shadow-[0_4px_12px_rgba(206,130,86,0.1)]'
         ]"
       >
         <div class="flex justify-between items-start md:items-center mb-3 gap-2">
           <div class="flex items-center gap-2 flex-1 min-w-0">
             <span class="text-lg text-[#ce8256] cursor-grab active:cursor-grabbing mr-1" title="拖拽排序">☰</span>
-            <span class="text-sm md:text-base font-semibold text-[#32241b] cursor-pointer transition-colors duration-200 hover:text-[#ce8256] truncate" @click="openEditNameDialog(index)" title="点击编辑名称">{{ item.label }}</span>
+            <span class="text-sm md:text-base font-semibold text-[#32241b] dark:text-[#c7cbd1] cursor-pointer transition-colors duration-200 hover:text-[#ce8256] truncate" @click="openEditNameDialog(index)" title="点击编辑名称">{{ item.label }}</span>
             <span v-if="hasChildren(item)" class="text-xs text-[#ce8256] bg-[rgba(206,130,86,0.1)] px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
               {{ getChildCount(item) }} 个子项
             </span>
@@ -673,7 +673,7 @@ const editingMessages = computed(() => {
         </div>
 
         <!-- 子菜单列表 -->
-        <div v-if="hasChildren(item) && 'child' in item && item.child && item.child.length > 0" class="mt-3 pt-3 border-t border-dashed border-[#e8ddd3] flex flex-col gap-2">
+        <div v-if="hasChildren(item) && 'child' in item && item.child && item.child.length > 0" class="mt-3 pt-3 border-t border-dashed border-[#e8ddd3] dark:border-[#2b2d30] flex flex-col gap-2">
           <div 
             v-for="(child, childIndex) in ((item as any).child as any[])" 
             :key="childIndex"
@@ -684,14 +684,14 @@ const editingMessages = computed(() => {
             @drop="handleChildDrop(index, Number(childIndex))"
             @dragend="handleChildDragEnd"
             :class="[
-              'flex justify-between items-center p-2 md:p-2 md:px-3 bg-white border rounded-md transition-all duration-200',
-              draggingChildIndex?.parentIndex === index && draggingChildIndex?.childIndex === Number(childIndex) ? 'opacity-50 border-[#ce8256] bg-[#fff8f5]' : '',
-              dragOverChildIndex?.parentIndex === index && dragOverChildIndex?.childIndex === Number(childIndex) && !(draggingChildIndex?.parentIndex === index && draggingChildIndex?.childIndex === Number(childIndex)) ? 'border-[#ce8256] bg-[#fff8f5] shadow-[0_2px_8px_rgba(206,130,86,0.2)] scale-[1.01]' : 'border-[#f0e6dd] hover:border-[#ce8256] hover:bg-[#fff8f5]'
+              'flex justify-between items-center p-2 md:p-2 md:px-3 bg-white dark:bg-[#1f2123] border rounded-md transition-all duration-200',
+              draggingChildIndex?.parentIndex === index && draggingChildIndex?.childIndex === Number(childIndex) ? 'opacity-50 border-[#ce8256] bg-[#fff8f5] dark:bg-[#2a221e]' : '',
+              dragOverChildIndex?.parentIndex === index && dragOverChildIndex?.childIndex === Number(childIndex) && !(draggingChildIndex?.parentIndex === index && draggingChildIndex?.childIndex === Number(childIndex)) ? 'border-[#ce8256] bg-[#fff8f5] dark:bg-[#2a221e] shadow-[0_2px_8px_rgba(206,130,86,0.2)] scale-[1.01]' : 'border-[#f0e6dd] dark:border-[#2b2d30] hover:border-[#ce8256] hover:bg-[#fff8f5] dark:hover:bg-[#2a221e]'
             ]"
           >
             <div class="flex items-center gap-2 flex-1 min-w-0">
               <span class="text-sm text-[#ce8256] cursor-grab active:cursor-grabbing mr-1" title="拖拽排序">☰</span>
-              <span class="text-xs md:text-sm text-[#6f4c39] font-medium cursor-pointer transition-colors duration-200 hover:text-[#ce8256] truncate" @click="openEditChildNameDialog(index, Number(childIndex))" title="点击编辑名称">{{ child.label }}</span>
+              <span class="text-xs md:text-sm text-[#6f4c39] dark:text-[#c7cbd1] font-medium cursor-pointer transition-colors duration-200 hover:text-[#ce8256] truncate" @click="openEditChildNameDialog(index, Number(childIndex))" title="点击编辑名称">{{ child.label }}</span>
               <span class="text-xs text-[#4caf50] bg-[rgba(76,175,80,0.1)] px-2 py-0.5 rounded-full font-medium whitespace-nowrap">{{ child.messages?.length || 0 }} 条消息</span>
             </div>
             <div class="flex gap-1 md:gap-1.5 shrink-0">
@@ -706,8 +706,8 @@ const editingMessages = computed(() => {
     <!-- 编辑菜单名称对话框 -->
     <Teleport to="body">
     <div v-if="showEditNameDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-9999 animate-fade-in">
-      <div class="bg-white rounded-2xl w-[90%] max-w-100 shadow-[0_20px_60px_rgba(0,0,0,0.3)] animate-slide-up">
-        <div class="flex justify-between items-center p-5 px-6 border-b-2 border-[#f0e6dd]">
+      <div class="bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-100 shadow-[0_20px_60px_rgba(0,0,0,0.3)] animate-slide-up">
+        <div class="flex justify-between items-center p-5 px-6 border-b-2 border-[#f0e6dd] dark:border-[#2b2d30]">
           <MacWindowControls 
             :show-close="true"
             :show-minimize="false"
@@ -716,26 +716,26 @@ const editingMessages = computed(() => {
             close-title="关闭"
             @close="cancelEditName()"
           />
-          <h3 class="text-lg text-[#32241b] m-0 font-semibold">编辑菜单名称</h3>
+          <h3 class="text-lg text-[#32241b] dark:text-[#ebedf0] m-0 font-semibold">编辑菜单名称</h3>
           <div class="w-8"></div>
         </div>
 
         <div class="p-6">
           <div class="mb-5">
-            <label class="block text-[13px] text-[#7a5a48] mb-1.5 font-medium">菜单名称</label>
+            <label class="block text-[13px] text-[#7a5a48] dark:text-[#a0a5ab] mb-1.5 font-medium">菜单名称</label>
             <input 
               v-model="newMenuName"
               type="text"
               placeholder="输入菜单名称..."
               @keyup.enter="confirmEditName()"
-              class="w-full py-2.5 px-3.5 border-2 border-[#e8ddd3] rounded-lg text-sm transition-all duration-200 bg-white font-inherit focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)]"
+              class="w-full py-2.5 px-3.5 border-2 border-[#e8ddd3] dark:border-[#3a3c3f] rounded-lg text-sm transition-all duration-200 bg-white dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] font-inherit focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)]"
               autofocus
             />
           </div>
         </div>
 
-        <div class="flex gap-3 p-4 px-6 border-t-2 border-[#f0e6dd]">
-          <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#f5f5f5] text-[#6f4c39] hover:bg-[#e0e0e0]" @click="cancelEditName()">取消</button>
+        <div class="flex gap-3 p-4 px-6 border-t-2 border-[#f0e6dd] dark:border-[#2b2d30]">
+          <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#f5f5f5] dark:bg-[#2b2d30] text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[#e0e0e0] dark:hover:bg-[#3a3c3f]" @click="cancelEditName()">取消</button>
           <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#ce8256] text-[#fff8f2] hover:bg-[#b8714a]" @click="confirmEditName()">确定</button>
         </div>
       </div>
@@ -745,8 +745,8 @@ const editingMessages = computed(() => {
     <!-- 添加菜单项对话框 -->
     <Teleport to="body">
     <div v-if="showAddDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-9999 animate-fade-in">
-      <div class="bg-white rounded-2xl w-[90%] max-w-100 shadow-[0_20px_60px_rgba(0,0,0,0.3)] animate-slide-up">
-        <div class="flex justify-between items-center p-5 px-6 border-b-2 border-[#f0e6dd]">
+      <div class="bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-100 shadow-[0_20px_60px_rgba(0,0,0,0.3)] animate-slide-up">
+        <div class="flex justify-between items-center p-5 px-6 border-b-2 border-[#f0e6dd] dark:border-[#2b2d30]">
           <MacWindowControls 
             :show-close="true"
             :show-minimize="false"
@@ -755,26 +755,26 @@ const editingMessages = computed(() => {
             close-title="关闭"
             @close="addingAsChild ? cancelAddChildItem() : cancelAddMenuItem()"
           />
-          <h3 class="text-lg text-[#32241b] m-0 font-semibold">{{ addingAsChild ? '添加子菜单项' : '添加菜单项' }}</h3>
+          <h3 class="text-lg text-[#32241b] dark:text-[#ebedf0] m-0 font-semibold">{{ addingAsChild ? '添加子菜单项' : '添加菜单项' }}</h3>
           <div class="w-8"></div>
         </div>
 
         <div class="p-6">
           <div class="mb-5">
-            <label class="block text-[13px] text-[#7a5a48] mb-1.5 font-medium">菜单标签</label>
+            <label class="block text-[13px] text-[#7a5a48] dark:text-[#a0a5ab] mb-1.5 font-medium">菜单标签</label>
             <input 
               v-model="newMenuLabel"
               type="text"
               :placeholder="addingAsChild ? '输入子菜单名称...' : '输入菜单名称...'"
               @keyup.enter="addingAsChild ? confirmAddChildItem() : confirmAddMenuItem()"
-              class="w-full py-2.5 px-3.5 border-2 border-[#e8ddd3] rounded-lg text-sm transition-all duration-200 bg-white font-inherit focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)]"
+              class="w-full py-2.5 px-3.5 border-2 border-[#e8ddd3] dark:border-[#3a3c3f] rounded-lg text-sm transition-all duration-200 bg-white dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] font-inherit focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)]"
               autofocus
             />
           </div>
         </div>
 
-        <div class="flex gap-3 p-4 px-6 border-t-2 border-[#f0e6dd]">
-          <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#f5f5f5] text-[#6f4c39] hover:bg-[#e0e0e0]" @click="addingAsChild ? cancelAddChildItem() : cancelAddMenuItem()">取消</button>
+        <div class="flex gap-3 p-4 px-6 border-t-2 border-[#f0e6dd] dark:border-[#2b2d30]">
+          <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#f5f5f5] dark:bg-[#2b2d30] text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[#e0e0e0] dark:hover:bg-[#3a3c3f]" @click="addingAsChild ? cancelAddChildItem() : cancelAddMenuItem()">取消</button>
           <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#ce8256] text-[#fff8f2] hover:bg-[#b8714a]" @click="addingAsChild ? confirmAddChildItem() : confirmAddMenuItem()">确定</button>
         </div>
       </div>
@@ -827,6 +827,10 @@ const editingMessages = computed(() => {
   font-weight: 500;
 }
 
+.dark .card-title {
+  color: #c0a090;
+}
+
 .panel-card {
   margin: 0;
   padding: 24px 32px 32px;
@@ -836,6 +840,10 @@ const editingMessages = computed(() => {
   box-shadow: none;
   overflow-y: auto;
   height: 100%;
+}
+
+.dark .panel-card {
+  background: #1a1c1e;
 }
 
 /* 移动端优化 */
@@ -872,6 +880,11 @@ const editingMessages = computed(() => {
   color: #8d563d;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.dark .card-pill {
+  background: #2b2d30;
+  color: #c0a090;
 }
 
 /* 消息提示滑入动画 */

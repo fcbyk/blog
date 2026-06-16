@@ -144,8 +144,8 @@ onMounted(() => {
     <div class="avatar-section mt-6">
       <div class="grid grid-cols-2 gap-5">
         <!-- 机器人头像 -->
-        <div class="flex flex-col items-center cursor-pointer p-4 rounded-xl transition-all duration-200 bg-white/50 hover:bg-[rgba(206,130,86,0.1)] hover:-translate-y-0.5" @click="openAvatarDialog('bot')">
-          <div class="w-20 h-20 rounded-full overflow-hidden border-[3px] border-[#ce8256] bg-[#f5f5f5] flex items-center justify-center mb-3 transition-all duration-200 hover:border-[#b8714a] hover:shadow-[0_4px_12px_rgba(206,130,86,0.3)]">
+        <div class="flex flex-col items-center cursor-pointer p-4 rounded-xl transition-all duration-200 bg-white/50 dark:bg-[#1f2123]/50 hover:bg-[rgba(206,130,86,0.1)] dark:hover:bg-[rgba(206,130,86,0.08)] hover:-translate-y-0.5" @click="openAvatarDialog('bot')">
+          <div class="w-20 h-20 rounded-full overflow-hidden border-[3px] border-[#ce8256] bg-[#f5f5f5] dark:bg-[#2b2d30] flex items-center justify-center mb-3 transition-all duration-200 hover:border-[#b8714a] hover:shadow-[0_4px_12px_rgba(206,130,86,0.3)]">
             <!-- 头像加载成功 -->
             <img 
               v-if="avatarConfig.bot && !botAvatarError" 
@@ -167,13 +167,13 @@ onMounted(() => {
               <span>🤖</span>
             </div>
           </div>
-          <p class="text-sm text-[#32241b] m-0 mb-1 font-medium">机器人头像</p>
-          <p class="text-xs text-[#9d6547] m-0">点击更换</p>
+          <p class="text-sm text-[#32241b] dark:text-[#c7cbd1] m-0 mb-1 font-medium">机器人头像</p>
+          <p class="text-xs text-[#9d6547] dark:text-[#a09080] m-0">点击更换</p>
         </div>
 
         <!-- 访客头像 -->
-        <div class="flex flex-col items-center cursor-pointer p-4 rounded-xl transition-all duration-200 bg-white/50 hover:bg-[rgba(206,130,86,0.1)] hover:-translate-y-0.5" @click="openAvatarDialog('user')">
-          <div class="w-20 h-20 rounded-full overflow-hidden border-[3px] border-[#ce8256] bg-[#f5f5f5] flex items-center justify-center mb-3 transition-all duration-200 hover:border-[#b8714a] hover:shadow-[0_4px_12px_rgba(206,130,86,0.3)]">
+        <div class="flex flex-col items-center cursor-pointer p-4 rounded-xl transition-all duration-200 bg-white/50 dark:bg-[#1f2123]/50 hover:bg-[rgba(206,130,86,0.1)] dark:hover:bg-[rgba(206,130,86,0.08)] hover:-translate-y-0.5" @click="openAvatarDialog('user')">
+          <div class="w-20 h-20 rounded-full overflow-hidden border-[3px] border-[#ce8256] bg-[#f5f5f5] dark:bg-[#2b2d30] flex items-center justify-center mb-3 transition-all duration-200 hover:border-[#b8714a] hover:shadow-[0_4px_12px_rgba(206,130,86,0.3)]">
             <!-- 头像加载成功 -->
             <img 
               v-if="avatarConfig.user && !userAvatarError" 
@@ -195,8 +195,8 @@ onMounted(() => {
               <span>👤</span>
             </div>
           </div>
-          <p class="text-sm text-[#32241b] m-0 mb-1 font-medium">访客头像</p>
-          <p class="text-xs text-[#9d6547] m-0">点击更换</p>
+          <p class="text-sm text-[#32241b] dark:text-[#c7cbd1] m-0 mb-1 font-medium">访客头像</p>
+          <p class="text-xs text-[#9d6547] dark:text-[#a09080] m-0">点击更换</p>
         </div>
       </div>
     </div>
@@ -224,6 +224,10 @@ onMounted(() => {
   font-weight: 500;
 }
 
+.dark .card-title {
+  color: #c0a090;
+}
+
 .panel-card {
   margin: 0;
   padding: 24px 32px 32px;
@@ -233,6 +237,10 @@ onMounted(() => {
   box-shadow: none;
   overflow-y: auto;
   height: 100%;
+}
+
+.dark .panel-card {
+  background: #1a1c1e;
 }
 
 /* 移动端优化 */
@@ -269,6 +277,11 @@ onMounted(() => {
   color: #8d563d;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.dark .card-pill {
+  background: #2b2d30;
+  color: #c0a090;
 }
 
 /* 消息提示滑入动画 */

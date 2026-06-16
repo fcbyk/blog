@@ -485,10 +485,10 @@ onMounted(() => {
           :placeholder="useRegexMode ? '输入正则表达式（如：^你好.*$）...' : '输入关键词...'"
           :disabled="loading || saving"
           @keyup.enter="addRule"
-          class="flex-1 py-2.5 px-3.5 border-2 border-[#e8ddd3] rounded-lg text-sm transition-all duration-200 bg-white focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)] disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-[#f5f5f5] min-w-0"
+          class="flex-1 py-2.5 px-3.5 border-2 border-[#e8ddd3] dark:border-[#3a3c3f] rounded-lg text-sm transition-all duration-200 bg-white dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)] disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-[#f5f5f5] dark:disabled:bg-[#2b2d30] min-w-0"
         >
         <button 
-          class="py-2.5 px-3 border-2 border-[#e8ddd3] rounded-lg bg-white text-[#9d6547] text-sm font-bold cursor-pointer transition-all duration-200 flex items-center justify-center shrink-0 hover:border-[#ce8256] hover:text-[#ce8256] [&.active]:bg-[#ce8256] [&.active]:border-[#ce8256] [&.active]:text-[#fff8f2]" 
+          class="py-2.5 px-3 border-2 border-[#e8ddd3] dark:border-[#3a3c3f] rounded-lg bg-white dark:bg-[#1f2123] text-[#9d6547] dark:text-[#c0a090] text-sm font-bold cursor-pointer transition-all duration-200 flex items-center justify-center shrink-0 hover:border-[#ce8256] hover:text-[#ce8256] [&.active]:bg-[#ce8256] [&.active]:border-[#ce8256] [&.active]:text-[#fff8f2]" 
           @click="useRegexMode = !useRegexMode"
           :class="{ active: useRegexMode }"
           :title="useRegexMode ? '关闭正则模式' : '开启正则模式'"
@@ -507,12 +507,12 @@ onMounted(() => {
 
     <!-- 帮助信息 -->
     <transition name="help-slide">
-      <div v-if="showHelp" class="mb-5 p-3 md:p-4 md:px-5 bg-[rgba(206,130,86,0.08)] border-l-4 border-[#ce8256] rounded-lg">
-        <p class="mb-2 mt-0 text-xs md:text-sm text-[#6f4c39] leading-relaxed">💡 <strong class="text-[#b8714a] font-semibold">使用说明：</strong>当用户发送的消息匹配规则时，会自动回复配置的消息。</p>
-        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] mb-0 text-xs md:text-sm text-[#6f4c39] leading-relaxed"><strong class="text-[#b8714a] font-semibold">关键词：</strong>完全匹配用户消息。例如：配置关键词 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] font-medium">你好</code> 后，用户发送"你好"将触发回复。</p>
-        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] mb-0 text-xs md:text-sm text-[#6f4c39] leading-relaxed"><strong class="text-[#b8714a] font-semibold">正则：</strong>使用正则表达式模糊匹配。例如：配置正则 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] font-medium">^你好.*$</code> 后，用户发送"你好"、"你好啊"等都会触发回复。</p>
-        <p class="mt-2 text-[11px] md:text-[13px] text-[#9d6547] mb-0">📌 提示：支持文本、图片、HTML、文件、导航等多种消息类型。正则按数组顺序依次匹配，匹配到第一个即停止。</p>
-        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] mb-0 text-xs md:text-sm text-[#6f4c39] leading-relaxed">常用正则示例：<code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] font-medium break-all">\\d+条消息</code> 匹配"10条消息"、<code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] font-medium">.*帮助.*</code> 匹配包含"帮助"的消息</p>
+      <div v-if="showHelp" class="mb-5 p-3 md:p-4 md:px-5 bg-[rgba(206,130,86,0.08)] dark:bg-[rgba(206,130,86,0.06)] border-l-4 border-[#ce8256] rounded-lg">
+        <p class="mb-2 mt-0 text-xs md:text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed">💡 <strong class="text-[#b8714a] dark:text-[#d4955e] font-semibold">使用说明：</strong>当用户发送的消息匹配规则时，会自动回复配置的消息。</p>
+        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] dark:border-[rgba(206,130,86,0.15)] mb-0 text-xs md:text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed"><strong class="text-[#b8714a] dark:text-[#d4955e] font-semibold">关键词：</strong>完全匹配用户消息。例如：配置关键词 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] dark:text-[#d4955e] font-medium">你好</code> 后，用户发送"你好"将触发回复。</p>
+        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] dark:border-[rgba(206,130,86,0.15)] mb-0 text-xs md:text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed"><strong class="text-[#b8714a] dark:text-[#d4955e] font-semibold">正则：</strong>使用正则表达式模糊匹配。例如：配置正则 <code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] dark:text-[#d4955e] font-medium">^你好.*$</code> 后，用户发送"你好"、"你好啊"等都会触发回复。</p>
+        <p class="mt-2 text-[11px] md:text-[13px] text-[#9d6547] dark:text-[#a09080] mb-0">📌 提示：支持文本、图片、HTML、文件、导航等多种消息类型。正则按数组顺序依次匹配，匹配到第一个即停止。</p>
+        <p class="mt-2 pt-2 border-t border-dashed border-[rgba(206,130,86,0.3)] dark:border-[rgba(206,130,86,0.15)] mb-0 text-xs md:text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed">常用正则示例：<code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] dark:text-[#d4955e] font-medium break-all">\\d+条消息</code> 匹配"10条消息"、<code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[11px] md:text-[13px] text-[#b8714a] dark:text-[#d4955e] font-medium">.*帮助.*</code> 匹配包含"帮助"的消息</p>
       </div>
     </transition>
 
@@ -585,10 +585,10 @@ onMounted(() => {
     </div>
 
     <!-- 空状态 -->
-    <div v-if="totalRulesCount === 0" class="text-center py-15 px-5 text-[#9d6547]">
+    <div v-if="totalRulesCount === 0" class="text-center py-15 px-5 text-[#9d6547] dark:text-[#a09080]">
       <div class="text-5xl mb-4 opacity-60">💬</div>
       <p class="m-0 text-[15px]">暂无回复规则配置</p>
-      <p class="mt-2 text-[13px] text-[#b89a85]">添加第一个规则开始配置吧！</p>
+      <p class="mt-2 text-[13px] text-[#b89a85] dark:text-[#8b8b8b]">添加第一个规则开始配置吧！</p>
     </div>
 
     <!-- 编辑对话框 -->
@@ -608,8 +608,8 @@ onMounted(() => {
     <!-- 正则顺序编辑对话框 -->
     <Teleport to="body">
     <div v-if="showOrderEditor" class="fixed inset-0 bg-black/50 flex items-center justify-center z-9999 animate-fade-in">
-      <div class="bg-white rounded-2xl w-[90%] max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.3)] animate-slide-up">
-        <div class="flex justify-between items-center p-5 px-6 border-b-2 border-[#f0e6dd]">
+      <div class="bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.3)] animate-slide-up">
+        <div class="flex justify-between items-center p-5 px-6 border-b-2 border-[#f0e6dd] dark:border-[#2b2d30]">
           <MacWindowControls 
             :show-close="true"
             :show-minimize="false"
@@ -618,17 +618,17 @@ onMounted(() => {
             close-title="关闭"
             @close="closeOrderEditor"
           />
-          <h3 class="text-lg text-[#32241b] m-0 font-semibold">修改正则匹配顺序</h3>
+          <h3 class="text-lg text-[#32241b] dark:text-[#ebedf0] m-0 font-semibold">修改正则匹配顺序</h3>
           <div class="w-8"></div>
         </div>
         <div class="p-6">
-          <div class="mb-5 p-4 bg-[rgba(206,130,86,0.08)] rounded-lg border-l-4 border-[#ce8256]">
-            <p class="mb-2 mt-0 text-sm text-[#6f4c39] leading-relaxed font-medium">当前正则：<code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[13px] text-[#b8714a] font-medium break-all">{{ editingOrderRuleId }}</code></p>
-            <p class="mb-2 text-sm text-[#9d6547] leading-relaxed">当前顺序：第 {{ replyRules.find(r => r.id === editingOrderRuleId)?.order }} 位</p>
-            <p class="m-0 text-sm text-[#9d6547] leading-relaxed">正则规则总数：{{ groupedRules.regexes.length }}</p>
+          <div class="mb-5 p-4 bg-[rgba(206,130,86,0.08)] dark:bg-[rgba(206,130,86,0.06)] rounded-lg border-l-4 border-[#ce8256]">
+            <p class="mb-2 mt-0 text-sm text-[#6f4c39] dark:text-[#c7cbd1] leading-relaxed font-medium">当前正则：<code class="bg-[rgba(206,130,86,0.15)] py-0.5 px-2 rounded font-mono text-[13px] text-[#b8714a] dark:text-[#d4955e] font-medium break-all">{{ editingOrderRuleId }}</code></p>
+            <p class="mb-2 text-sm text-[#9d6547] dark:text-[#a09080] leading-relaxed">当前顺序：第 {{ replyRules.find(r => r.id === editingOrderRuleId)?.order }} 位</p>
+            <p class="m-0 text-sm text-[#9d6547] dark:text-[#a09080] leading-relaxed">正则规则总数：{{ groupedRules.regexes.length }}</p>
           </div>
           <div class="mb-4">
-            <label class="block text-[13px] text-[#7a5a48] mb-1.5 font-medium" for="new-order-value">新顺序：</label>
+            <label class="block text-[13px] text-[#7a5a48] dark:text-[#a0a5ab] mb-1.5 font-medium" for="new-order-value">新顺序：</label>
             <input 
               id="new-order-value"
               type="number" 
@@ -638,13 +638,13 @@ onMounted(() => {
               placeholder="输入新的顺序..."
               @keyup.enter="confirmOrderChange"
               autofocus
-              class="w-full py-2.5 px-3.5 border-2 border-[#e8ddd3] rounded-lg text-sm transition-all duration-200 bg-white font-inherit focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)]"
+              class="w-full py-2.5 px-3.5 border-2 border-[#e8ddd3] dark:border-[#3a3c3f] rounded-lg text-sm transition-all duration-200 bg-white dark:bg-[#1f2123] text-[#32241b] dark:text-[#c7cbd1] font-inherit focus:outline-none focus:border-[#ce8256] focus:shadow-[0_0_0_3px_rgba(206,130,86,0.1)]"
             >
           </div>
-          <p class="m-0 text-[13px] text-[#9d6547] leading-relaxed p-3 bg-[rgba(206,130,86,0.05)] rounded-md">💡 提示：输入的数字表示该正则将移动到的新位置，其他正则会相应调整顺序。</p>
+          <p class="m-0 text-[13px] text-[#9d6547] dark:text-[#a09080] leading-relaxed p-3 bg-[rgba(206,130,86,0.05)] dark:bg-[rgba(206,130,86,0.04)] rounded-md">💡 提示：输入的数字表示该正则将移动到的新位置，其他正则会相应调整顺序。</p>
         </div>
-        <div class="flex gap-3 p-4 px-6 border-t-2 border-[#f0e6dd]">
-          <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#f5f5f5] text-[#6f4c39] hover:bg-[#e0e0e0]" @click="closeOrderEditor">取消</button>
+        <div class="flex gap-3 p-4 px-6 border-t-2 border-[#f0e6dd] dark:border-[#2b2d30]">
+          <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#f5f5f5] dark:bg-[#2b2d30] text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[#e0e0e0] dark:hover:bg-[#3a3c3f]" @click="closeOrderEditor">取消</button>
           <button class="flex-1 py-2.5 px-5 border-none rounded-lg text-sm cursor-pointer transition-all duration-200 font-medium bg-[#ce8256] text-[#fff8f2] hover:bg-[#b8714a]" @click="confirmOrderChange">确定</button>
         </div>
       </div>
@@ -684,6 +684,10 @@ onMounted(() => {
   font-weight: 500;
 }
 
+.dark .card-title {
+  color: #c0a090;
+}
+
 .panel-card {
   margin: 0;
   padding: 24px 32px 32px;
@@ -693,6 +697,10 @@ onMounted(() => {
   box-shadow: none;
   overflow-y: auto;
   height: 100%;
+}
+
+.dark .panel-card {
+  background: #1a1c1e;
 }
 
 /* 移动端优化 */
@@ -729,6 +737,11 @@ onMounted(() => {
   color: #8d563d;
   font-size: 12px;
   white-space: nowrap;
+}
+
+.dark .card-pill {
+  background: #2b2d30;
+  color: #c0a090;
 }
 
 /* 消息提示滑入动画 */
