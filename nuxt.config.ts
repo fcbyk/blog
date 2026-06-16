@@ -32,6 +32,9 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "netlify"
+    // Netlify Functions 默认 10s 超时，作为服务端兜底
+    // 客户端超时由 app/composables/useApi.ts 统一管理（10s）
+    // server/api/proxy/md.get.ts 对外部请求有独立的 AbortController 超时
   },
 
   app: {

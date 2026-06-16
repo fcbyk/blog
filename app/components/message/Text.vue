@@ -43,7 +43,7 @@ defineProps({
 .text-message {
     border-radius: 8px;
     padding: 10px 14px;
-    max-width: calc(100% - 48px);
+    max-width: 100%;
     box-shadow: 0 1px 1px var(--shadow-light);
     position: relative;
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { api, ApiTimeoutError } from '~~/app/composables/useApi'
 const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/fcbyk/md/main'
 const route = useRoute()
 const router = useRouter()
@@ -9,6 +10,7 @@ const activePath = ref('')
 const rawMarkdown = ref('')
 const loading = ref(false)
 const loadError = ref(false)
+const loadTimeout = ref(false)
 const contentRef = ref<HTMLElement>()
 const expandedFolders = ref<Set<string>>(new Set())
 const sidebarCollapsed = ref(false)
@@ -45,8 +47,9 @@ async function loadContent() {
   const target = activePath.value
   loading.value = true
   loadError.value = false
+  loadTimeout.value = false
   try {
-    const res: string = await $fetch('/api/proxy/md', {
+    const res: string = await api('/api/proxy/md', {
       query: { url: `${GITHUB_RAW_BASE}/${target}` },
     }) as string
     // 防止竞态：用户已切走，丢弃结果
@@ -54,7 +57,10 @@ async function loadContent() {
     contentCache.set(target, res)
     rawMarkdown.value = res
   } catch (err) {
-    console.error('加载内容失败', err)
+    console.error(err instanceof ApiTimeoutError ? '加载内容超时' : '加载内容失败', err)
+    if (err instanceof ApiTimeoutError) {
+      loadTimeout.value = true
+    }
     loadError.value = true
   }
   loading.value = false
@@ -255,7 +261,7 @@ function handleClose() {
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              <span class="text-sm text-[#8f949a]">加载文章失败，请重试</span>
+              <span class="text-sm text-[#8f949a]">{{ loadTimeout ? '加载超时，请检查网络后重试' : '加载文章失败，请重试' }}</span>
               <button
                 class="px-5 py-2 rounded-lg border-none cursor-pointer text-sm text-white bg-[#ce8256] hover:bg-[#a05a2c] transition-colors"
                 @click="loadContent()"

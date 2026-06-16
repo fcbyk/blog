@@ -1,5 +1,7 @@
 import type { Datas, DocumentId } from '~~/shared/types/database'
 import { DOCUMENT_IDS } from '~~/shared/types/database'
+import { DEFAULT_CONFIG } from '~~/shared/defaultConfig'
+import { api, ApiTimeoutError } from './useApi'
 
 const STORAGE_KEY = 'app-data-cache'
 
@@ -61,13 +63,17 @@ export function useAppDataManager() {
     appStore.setLoading(true)
     
     try {
-      const res = await $fetch<Datas>('/api/config/all')
+      const res = await api<Datas>('/api/config/all')
       appStore.setDatas(res)
       
       // 保存到缓存
       saveToCache(res)
     } catch (err) {
-      console.error('Failed to load app datas:', err)
+      if (err instanceof ApiTimeoutError) {
+        console.error('加载配置超时:', err.message)
+      } else {
+        console.error('Failed to load app datas:', err)
+      }
       appStore.setError()
       
       // 失败时尝试用缓存
@@ -75,6 +81,9 @@ export function useAppDataManager() {
         const cached = loadFromCache()
         if (cached) {
           appStore.setDatas(cached)
+        } else {
+          // 缓存也没有 → 用默认配置兜底
+          appStore.setDatas(DEFAULT_CONFIG)
         }
       }
     } finally {
@@ -103,7 +112,7 @@ export function useAppDataManager() {
       }
       
       // 3. 调用 API（发送完整数据）
-      const result = await $fetch<Datas[T]>(`/api/config/${id}`, {
+      const result = await api<Datas[T]>(`/api/config/${id}`, {
         method: 'PUT',
         body: mergedData,
         headers: getAuthHeader()

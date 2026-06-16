@@ -16,15 +16,10 @@ const avatarUrl = computed(() => {
     return props.role === 'bot' ? appStore.datas.baseConfig.avatar.bot : appStore.datas.baseConfig.avatar.user
 })
 
-// 计算头像字母：A 对应 bot，Q 对应 user
-const avatarLetter = computed(() => {
-    return props.role === 'bot' ? 'A' : 'Q'
+// 是否显示头像
+const showAvatar = computed(() => {
+    return !!avatarUrl.value && !imageError.value
 })
-
-// 处理图片加载错误
-const handleImageError = () => {
-    imageError.value = true
-}
 </script>
 
 <template>
@@ -33,46 +28,16 @@ const handleImageError = () => {
         'my-message self-start': role === 'bot'
     }">
 
-        <div class="avatar-container w-10 h-10 rounded-sm overflow-hidden shrink-0">
-            <!-- 尝试显示图片头像 -->
+        <div v-if="showAvatar" class="avatar-container w-10 h-10 rounded-sm overflow-hidden shrink-0">
             <img 
-                v-if="avatarUrl && !imageError" 
                 class="avatar-image object-cover w-full h-full" 
                 :src="avatarUrl" 
                 :alt="role" 
-                @error="handleImageError"
+                @error="imageError = true"
             />
-            <!-- 图片加载失败或未配置时显示字母头像 -->
-            <div v-else class="avatar-letter w-full h-full flex items-center justify-center text-white font-bold text-lg" :class="role">
-                {{ avatarLetter }}
-            </div>
         </div>
 
         <slot></slot>
 
     </div>
 </template>
-
-
-
-<style scoped>
-.avatar-letter {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.avatar-letter.bot {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.avatar-letter.user {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-:global(.dark) .avatar-letter.bot {
-    background: linear-gradient(135deg, #5f646b 0%, #454a50 100%);
-}
-
-:global(.dark) .avatar-letter.user {
-    background: linear-gradient(135deg, #89df61 0%, #77c754 100%);
-}
-</style>

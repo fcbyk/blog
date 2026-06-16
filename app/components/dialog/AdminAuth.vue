@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { api, ApiTimeoutError } from '~~/app/composables/useApi'
 const props = defineProps<{
   modelValue: boolean
 }>()
@@ -69,7 +70,7 @@ async function verifyPassword() {
   errorMessage.value = ''
 
   try {
-    const response = await $fetch<{ success: boolean; message?: string; token?: string }>('/api/auth/verify-auth', {
+    const response = await api<{ success: boolean; message?: string; token?: string }>('/api/auth/verify-auth', {
       method: 'POST',
       body: {
         username: username.value,
@@ -97,7 +98,7 @@ async function verifyPassword() {
   } catch (err) {
     console.error('验证失败:', err)
     error.value = true
-    errorMessage.value = '验证失败，请稍后重试'
+    errorMessage.value = err instanceof ApiTimeoutError ? err.message : '验证失败，请稍后重试'
     triggerShake()
   } finally {
     loading.value = false

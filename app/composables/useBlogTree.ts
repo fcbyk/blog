@@ -1,4 +1,5 @@
 import type { TreeItem } from '~~/shared/types'
+import { api } from './useApi'
 
 // 模块级缓存，整个应用共享一份
 let cachedTree: TreeItem[] | null = null
@@ -38,7 +39,7 @@ export function useBlogTree() {
 
     loading.value = true
     error.value = false
-    fetchPromise = $fetch('/api/proxy/md', {
+    fetchPromise = api('/api/proxy/md', {
       query: { url: `${GITHUB_RAW_BASE}/index.json` },
     }).then((data: unknown) => {
       const parsed = JSON.parse(data as string) as TreeItem[]
