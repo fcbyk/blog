@@ -7,7 +7,6 @@ export default defineNuxtConfig({
   modules: ["@pinia/nuxt", "@nuxtjs/color-mode"],
   routeRules: {
     "/": { ssr: false },
-    "/editor": { ssr: false },
     "/blog/**": { ssr: false },
     "/q/*": { ssr: false }
   },
@@ -32,9 +31,6 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "netlify"
-    // Netlify Functions 默认 10s 超时，作为服务端兜底
-    // 客户端超时由 app/composables/useApi.ts 统一管理（10s）
-    // server/api/proxy/md.get.ts 对外部请求有独立的 AbortController 超时
   },
 
   app: {
@@ -70,12 +66,8 @@ export default defineNuxtConfig({
     }
   },
 
-  // 运行时配置 - 从环境变量读取
   runtimeConfig: {
-    mongodbUri: "",
-    mongodbCollection: "configs",
-    adminUsername: "",
-    adminPassword: ""
+    githubRawBase: ""
   },
 
   vite: {

@@ -5,8 +5,6 @@ import { api } from './useApi'
 let cachedTree: TreeItem[] | null = null
 let fetchPromise: Promise<TreeItem[]> | null = null
 
-const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/fcbyk/blog/md'
-
 export function useBlogTree() {
   const tree = ref<TreeItem[]>(cachedTree ?? [])
   const loading = ref(!cachedTree)
@@ -39,8 +37,8 @@ export function useBlogTree() {
 
     loading.value = true
     error.value = false
-    fetchPromise = api('/api/proxy/md', {
-      query: { url: `${GITHUB_RAW_BASE}/index.json` },
+    fetchPromise = api('/api/proxy/raw', {
+      query: { url: '/md/index.json' },
     }).then((data: unknown) => {
       const parsed = JSON.parse(data as string) as TreeItem[]
       cachedTree = parsed
@@ -51,7 +49,7 @@ export function useBlogTree() {
       tree.value = await fetchPromise
     } catch {
       error.value = true
-      fetchPromise = null // 允许下次重试
+      fetchPromise = null
     } finally {
       loading.value = false
     }

@@ -1,4 +1,4 @@
-import type { Datas } from '~~/shared/types/database'
+import type { Datas } from '~~/shared/types/data'
 
 export const useAppStore = defineStore('app', () => {
   const datas = ref<Datas | null>(null)

@@ -1,4 +1,4 @@
-import type { Datas } from './types/database'
+import type { Datas } from './types/data'
 
 export const DEFAULT_CONFIG: Datas = {
   baseConfig: {

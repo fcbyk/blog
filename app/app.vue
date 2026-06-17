@@ -3,7 +3,6 @@ const showSidebar = ref(false)
 const appDataManager = useAppDataManager()
 
 onMounted(() => {
-  initToken()
   // 后台加载配置数据，不阻塞页面渲染
   // 各页面自行判断 appStore.isReady 决定加载状态
   appDataManager.initDatas()

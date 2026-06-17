@@ -15,14 +15,6 @@ const isOnQAPage = computed(() => route.path.startsWith('/q/'))
 let hideTimer: ReturnType<typeof setTimeout> | null = null
 let timer: ReturnType<typeof setInterval> | null = null
 
-const isAdminVerified = computed(() => {
-  const isVerified = useCookie('admin-verified', {
-    maxAge: 60 * 30,
-    sameSite: 'strict'
-  })
-  return !!isVerified.value
-})
-
 const formatDateTime = () => {
   const now = new Date()
   const month = now.getMonth() + 1
@@ -53,18 +45,6 @@ const cancelHide = () => {
     clearTimeout(hideTimer)
     hideTimer = null
   }
-}
-
-const editorStore = useEditorStore()
-
-const handleLogout = () => {
-  const verifiedCookie = useCookie('admin-verified', {
-    maxAge: 60 * 30,
-    sameSite: 'strict'
-  })
-  verifiedCookie.value = null
-  showMenu.value = false
-  navigateTo('/')
 }
 
 const openSidebar = () => {
@@ -118,25 +98,6 @@ onUnmounted(() => {
           >
             <IconBlog />
             <span>Blog</span>
-          </button>
-
-          <NuxtLink
-            v-if="isAdminVerified"
-            to="/editor"
-            class="flex items-center space-x-3 px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors"
-            @click="showMenu = false"
-          >
-            <IconSettings />
-            <span>编辑器</span>
-          </NuxtLink>
-                
-          <button
-            v-if="isAdminVerified"
-            @click="handleLogout"
-            class="flex items-center space-x-3 w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-red-600 dark:hover:text-[#ff7f7f] transition-colors border-none cursor-pointer"
-          >
-            <IconLogout />
-            <span>退出登录</span>
           </button>
         </div>
       </div>

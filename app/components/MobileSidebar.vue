@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import type { EditorPage } from '~~/shared/types'
-
-// 使用 v-model 双向绑定控制侧边栏显示
 const props = defineProps<{
   modelValue: boolean
 }>()
@@ -10,7 +7,6 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
 }>()
 
-const editorStore = useEditorStore()
 const route = useRoute()
 
 const colorMode = useColorMode()
@@ -43,7 +39,6 @@ function handleBlogArticle(path: string) {
 watch(() => props.modelValue, async (val) => {
   if (val && isOnBlogPage.value) {
     await fetchBlogTree()
-    // 自动展开所有文件夹
     for (const item of blogTree.value) {
       if (item.type === 'folder') {
         blogExpandedFolders.value.add(item.path)
@@ -52,48 +47,9 @@ watch(() => props.modelValue, async (val) => {
   }
 })
 
-// 检查是否已验证管理员权限
-const isAdminVerified = computed(() => {
-  const isVerified = useCookie('admin-verified', {
-    maxAge: 60 * 30,
-    sameSite: 'strict'
-  })
-  return !!isVerified.value
-})
-
 // 关闭侧边栏
 const handleClose = () => {
   emit('update:modelValue', false)
-}
-
-
-
-// 处理导航到编辑器页面
-const handleNavigateToPage = (page: EditorPage) => {
-  // 设置当前页面
-  editorStore.setActivePage(page)
-  // 关闭侧边栏
-  handleClose()
-  // 如果当前不在编辑器页面，则跳转
-  if (route.path !== '/editor') {
-    navigateTo('/editor')
-  }
-}
-
-
-
-// 处理退出登录
-const handleLogout = () => {
-  // 清除验证 cookie
-  const verifiedCookie = useCookie('admin-verified', {
-    maxAge: 60 * 30,
-    sameSite: 'strict'
-  })
-  verifiedCookie.value = null
-  
-  // 关闭侧边栏并跳转到首页
-  handleClose()
-  navigateTo('/')
 }
 
 // 切换主题（日间/夜间）
@@ -208,61 +164,6 @@ const toggleTheme = () => {
               </button>
             </template>
           </template>
-
-          <!-- 登录后显示编辑器页面切换 -->
-          <template v-if="isAdminVerified">
-            <!-- 分隔线 -->
-            <div class="border-t border-gray-200 dark:border-[#2b2d30] my-2"></div>
-
-            <div class="px-3 py-2 text-xs font-medium text-gray-500 dark:text-[#8f949a] uppercase tracking-wider">
-              编辑器页面
-            </div>
-
-            <button 
-              @click="handleNavigateToPage('base')"
-              :class="['w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left', editorStore.activePage === 'base' ? 'bg-indigo-50 dark:bg-[#2f3237] text-indigo-600 dark:text-[#ebedf0]' : 'hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] text-gray-700 dark:text-[#c7cbd1]']"
-            >
-              <IconSettings />
-              <span>基础设置</span>
-            </button>
-
-            <button 
-              @click="handleNavigateToPage('reply')"
-              :class="['w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left', editorStore.activePage === 'reply' ? 'bg-indigo-50 dark:bg-[#2f3237] text-indigo-600 dark:text-[#ebedf0]' : 'hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] text-gray-700 dark:text-[#c7cbd1]']"
-            >
-              <IconMessage />
-              <span>回复规则</span>
-            </button>
-
-            <button 
-              @click="handleNavigateToPage('url')"
-              :class="['w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left', editorStore.activePage === 'url' ? 'bg-indigo-50 dark:bg-[#2f3237] text-indigo-600 dark:text-[#ebedf0]' : 'hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] text-gray-700 dark:text-[#c7cbd1]']"
-            >
-              <IconLink />
-              <span>URL匹配</span>
-            </button>
-
-            <button 
-              @click="handleNavigateToPage('menu')"
-              :class="['w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left', editorStore.activePage === 'menu' ? 'bg-indigo-50 dark:bg-[#2f3237] text-indigo-600 dark:text-[#ebedf0]' : 'hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] text-gray-700 dark:text-[#c7cbd1]']"
-            >
-              <IconList />
-              <span>菜单设置</span>
-            </button>
-          </template>
-
-          <!-- 分隔线 -->
-          <div class="border-t border-gray-200 dark:border-[#2b2d30] my-2"></div>
-
-          <!-- 退出登录按钮 - 仅管理员可见 -->
-          <button 
-            v-if="isAdminVerified"
-            @click="handleLogout"
-            class="w-full flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-[#2f3237] hover:text-red-600 dark:hover:text-[#ff7f7f] transition-colors text-gray-700 dark:text-[#c7cbd1] text-left"
-          >
-            <IconLogout />
-            <span>退出登录</span>
-          </button>
         </div>
       </nav>
 
@@ -274,7 +175,6 @@ const toggleTheme = () => {
       </div>
     </aside>
   </Transition>
-
 
 </template>
 

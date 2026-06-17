@@ -6,26 +6,20 @@
     "dev:net": "nuxt dev --host 0.0.0.0",
     "build": "nuxt build",
     "generate": "nuxt generate",
-    "preview": "nuxt preview",
-    "md5": "node scripts/generate-md5.js"
+    "preview": "nuxt preview"
   },
   "dependencies": {
     "@nuxtjs/color-mode": "^3.5.2",
     "@pinia/nuxt": "^0.11.3",
     "dompurify": "^3.4.2",
     "highlight.js": "^11.11.1",
-    "jsonwebtoken": "^9.0.3",
     "markdown-it": "^14.2.0",
-    "md5": "^2.3.0",
-    "mongoose": "^9.6.1",
     "nuxt": "^4.0.0",
     "pinia": "^3.0.4"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.4",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/markdown-it": "^14.1.2",
-    "@types/md5": "^2.3.6",
     "tailwindcss": "^4.2.4"
   }
 }

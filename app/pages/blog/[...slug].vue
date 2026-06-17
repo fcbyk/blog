@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { api, ApiTimeoutError } from '~~/app/composables/useApi'
-const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/fcbyk/blog/md'
 const route = useRoute()
 const router = useRouter()
 
@@ -49,10 +48,9 @@ async function loadContent() {
   loadError.value = false
   loadTimeout.value = false
   try {
-    const res: string = await api('/api/proxy/md', {
-      query: { url: `${GITHUB_RAW_BASE}/${target}` },
+    const res: string = await api('/api/proxy/raw', {
+      query: { url: `/md/${target}` },
     }) as string
-    // 防止竞态：用户已切走，丢弃结果
     if (activePath.value !== target) return
     contentCache.set(target, res)
     rawMarkdown.value = res
@@ -108,13 +106,11 @@ watch(activePath, () => {
 // 初始化
 onMounted(async () => {
   await fetchTree()
-  // 自动展开所有文件夹
   for (const item of tree.value) {
     if (item.type === 'folder') {
       expandedFolders.value.add(item.path)
     }
   }
-  // 确定初始文件
   const urlPath = slugToPath()
   if (urlPath && flatFiles.value.some((f) => f.path === urlPath)) {
     activePath.value = urlPath

@@ -2,8 +2,6 @@
 const messageStore = useMessageStore()
 const sender = useMessageSender()
 const matcher = useMessageMatcher()
-const parser = useCommandParser()
-const editorStore = useEditorStore()
 
 const props = defineProps({
     modelValue: {
@@ -29,20 +27,16 @@ const emit = defineEmits(['update:modelValue', 'submit'])
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const inputValue = ref(props.modelValue)
 const baseLineHeight = ref(24)
-const showPasswordDialog = ref(false)
 
-// 计算是否禁用（正在输入或外部传入的 disabled）
 const isDisabled = computed(() => {
     return props.disabled || messageStore.isTyping
 })
 
-// 监听外部传入的 modelValue 变化
 watch(() => props.modelValue, (newVal) => {
     inputValue.value = newVal
     adjustHeight()
 })
 
-// 自动调整高度
 const adjustHeight = () => {
     nextTick(() => {
         if (!textareaRef.value) return
@@ -53,7 +47,6 @@ const adjustHeight = () => {
     })
 }
 
-// 处理输入
 const handleInput = (e: Event) => {
     const target = e.target as HTMLTextAreaElement
     inputValue.value = target.value
@@ -61,30 +54,11 @@ const handleInput = (e: Event) => {
     adjustHeight()
 }
 
-// 处理提交
 const handleSubmit = async () => {
     if (!inputValue.value.trim() || isDisabled.value) return
     
     const msg = inputValue.value.trim()
     
-    // 优先解析命令：byk editor
-    const isCommand = await parser.parseOne(
-        msg,
-        /^byk\s+editor$/i,
-        () => {
-            showPasswordDialog.value = true
-        }
-    )
-    
-    // 如果是命令，执行后直接返回，不走聊天逻辑
-    if (isCommand) {
-        inputValue.value = ''
-        emit('update:modelValue', '')
-        adjustHeight()
-        return
-    }
-    
-    // 如果不是命令，按正常流程处理
     // 发送用户消息
     await sender.sendAsUser({ type: 'text', content: msg })
     
@@ -100,27 +74,9 @@ const handleSubmit = async () => {
     }
 }
 
-// 处理密码验证成功
-const handleVerified = (success: boolean) => {
-    if (success) {
-        // 设置 cookie，标记已验证（30分钟有效）
-        const verifiedCookie = useCookie('admin-verified', {
-            maxAge: 60 * 30,
-            sameSite: 'strict'
-        })
-        verifiedCookie.value = 'true'
-        
-        // 验证成功后跳转到编辑器页面
-        editorStore.resetPage()
-        navigateTo('/editor')
-    }
-}
-
-// 处理键盘事件
 const handleKeyDown = (e: KeyboardEvent) => {
-    // 检查是否正在使用输入法（如中文输入法）
     if (e.isComposing || e.keyCode === 229) {
-        return; // 如果正在输入中文，不触发发送
+        return;
     }
     
     if (e.key === 'Enter' && !e.shiftKey && !isDisabled.value) {
@@ -140,7 +96,6 @@ onMounted(() => {
 
 <template>
     <div class="bg-gray-50 dark:bg-[#1f2123] p-2 pl-0 min-h-12.5"> 
-        <!-- 输入框容器 --> 
         <div class="flex items-end transition-all duration-200">
             <textarea 
                 ref="textareaRef" 
@@ -168,10 +123,4 @@ onMounted(() => {
             </button>
         </div>
     </div>
-    
-    <!-- 管理员认证对话框 -->
-    <DialogAdminAuth 
-        v-model="showPasswordDialog" 
-        @verified="handleVerified"
-    />
 </template>

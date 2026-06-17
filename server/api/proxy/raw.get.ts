@@ -1,16 +1,19 @@
 export default defineEventHandler(async (event) => {
-  const url = getQuery(event).url as string
+  const relativePath = getQuery(event).url as string
 
-  if (!url) {
+  if (!relativePath) {
     throw createError({ statusCode: 400, message: 'Missing ?url param' })
   }
+
+  const base = useRuntimeConfig().githubRawBase as string
+  const fullUrl = `${base}${relativePath}`
 
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), 10_000)
 
   let res: Response
   try {
-    res = await fetch(url, { signal: controller.signal })
+    res = await fetch(fullUrl, { signal: controller.signal })
   } catch (err: any) {
     clearTimeout(timeoutId)
     if (err?.name === 'AbortError') {
