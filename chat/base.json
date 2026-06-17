@@ -1,0 +1,45 @@
+{
+  "menu": [
+    {
+      "label": "域名由来",
+      "messages": [
+        {
+          "type": "text",
+          "content": "fcbyk.com这个域名是怎么来的？",
+          "role": "user"
+        }
+      ]
+    },
+    {
+      "label": "书签",
+      "messages": [
+        {
+          "type": "text",
+          "content": "获取书签",
+          "role": "user"
+        },
+        {
+          "type": "text",
+          "content": "暂时没写",
+          "role": "bot"
+        },
+        {
+          "type": "text",
+          "content": "目前很多组件还在完善中",
+          "role": "bot"
+        }
+      ]
+    }
+  ],
+  "helloMsg": [
+    {
+      "type": "text",
+      "content": "你好呀，欢迎来到不愉的站点😊",
+      "loadingTime": 1000
+    }
+  ],
+  "avatar": {
+    "bot": "https://ss2.bdstatic.com/70cFvXSh_Q1YnxGkpoWK1HF6hhy/it/u=3315366793,2321372572&fm=253&gp=0.jpg",
+    "user": "https://pic1.zhimg.com/v2-abed1a8c04700ba7d72b45195223e0ff_xs.jpg"
+  }
+}
