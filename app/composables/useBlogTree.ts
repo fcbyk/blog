@@ -5,7 +5,7 @@ import { api } from './useApi'
 let cachedTree: TreeItem[] | null = null
 let fetchPromise: Promise<TreeItem[]> | null = null
 
-const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/fcbyk/md/main'
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/fcbyk/blog/md'
 
 export function useBlogTree() {
   const tree = ref<TreeItem[]>(cachedTree ?? [])

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { api, ApiTimeoutError } from '~~/app/composables/useApi'
-const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/fcbyk/md/main'
+const GITHUB_RAW_BASE = 'https://raw.githubusercontent.com/fcbyk/blog/md'
 const route = useRoute()
 const router = useRouter()
 
