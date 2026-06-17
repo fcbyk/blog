@@ -3,27 +3,5 @@
     "name": "首页",
     "path": "index.md",
     "type": "file"
-  },
-  {
-    "name": "文章",
-    "path": "posts/",
-    "type": "folder",
-    "children": [
-      {
-        "name": "Hello World",
-        "path": "posts/hello-world.md",
-        "type": "file"
-      },
-      {
-        "name": "Markdown 语法测试",
-        "path": "posts/markdown-test.md",
-        "type": "file"
-      }
-    ]
-  },
-  {
-    "name": "关于",
-    "path": "about.md",
-    "type": "file"
   }
 ]
