@@ -1,0 +1,56 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+html {
+  overscroll-behavior: none;
+  background-color: #111315;
+  --page-bg: #FAFAFA;
+}
+
+html.dark {
+  --page-bg: #111315;
+}
+
+html,
+body,
+#app {
+  min-height: 100dvh;
+  background: var(--page-bg);
+}
+
+@media (min-width: 768px) {
+  html:not(.dark) body,
+  html:not(.dark) #app {
+    background: linear-gradient(135deg, #a8b8d8, #c8b8d8, #b8c8d8, #d8b8c8, #b8d8c8);
+    background-size: 300% 300%;
+    background-position: 50% 50%;
+    position: relative;
+  }
+}
+
+@media (max-width: 767px) {
+  html:not(.dark) body,
+  html:not(.dark) #app {
+    background: var(--page-bg) !important;
+  }
+  html:not(.dark)::before {
+    display: none !important;
+  }
+}
+
+html.dark,
+html.dark body,
+html.dark #app {
+  background: var(--page-bg) !important;
+}
+html.dark::before {
+  display: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
