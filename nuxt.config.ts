@@ -8,7 +8,8 @@ export default defineNuxtConfig({
   routeRules: {
     "/": { ssr: false },
     "/blog/**": { ssr: false },
-    "/q/*": { ssr: false }
+    "/q/*": { ssr: false },
+    "/hand": { ssr: false }
   },
   colorMode: {
     classSuffix: "",
