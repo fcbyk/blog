@@ -130,13 +130,13 @@ async function loadLocalData() {
 }
 
 // ─── GitHub 数据 ───
-const githubUrl = ref('')
+const githubUrl = ref('https://raw.githubusercontent.com/GitHub昵称/仓库/分支/')
 const githubLoading = ref(false)
 const githubError = ref('')
 
 function openGithubSource() {
   sourceType.value = 'github'
-  githubUrl.value = ''
+  githubUrl.value = 'https://raw.githubusercontent.com/GitHub昵称/仓库/分支/'
   githubError.value = ''
   setTimeout(() => {
     const input = document.querySelector<HTMLInputElement>('#github-url-input')
@@ -167,7 +167,7 @@ async function loadGithubData() {
       regexReplies: JSON.parse(regexRes),
       urlTriggers: JSON.parse(urlRes),
     })
-    githubUrl.value = ''
+    githubUrl.value = 'https://raw.githubusercontent.com/GitHub昵称/仓库/分支/'
     closeSourcePopup()
     showToast('已加载 GitHub 数据')
   } catch (err: any) {
@@ -253,7 +253,7 @@ watch([viewMode, () => editorStore.activePage], () => {
 
     <!-- 数据源弹窗 -->
     <Teleport to="body">
-      <div v-if="editorStore.showImportPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-9999" @click.self="closeSourcePopup">
+      <div v-if="editorStore.showImportPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-9999">
         <div :class="['bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden', sourceType === 'local' && localShaking ? 'animate-shake' : '']">
           <!-- 标题栏 -->
           <div class="flex justify-between items-center p-4 px-5 border-b border-[#f0e6dd] dark:border-[#2b2d30]">
