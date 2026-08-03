@@ -37,15 +37,6 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    include: ['vue', 'pinia', 'axios']
-  },
-  server: {
-    port: 5173,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3456',
-        changeOrigin: true
-      }
-    }
+    include: ['vue', 'pinia']
   }
 })

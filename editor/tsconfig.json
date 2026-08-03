@@ -2,13 +2,13 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
+    "baseUrl": ".",
     "strict": true,
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "lib": ["ESNext", "DOM"],
-    "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@shared": ["../shared"],
@@ -16,14 +16,14 @@
       "@types": ["../shared/types"],
       "@types/*": ["../shared/types/*"]
     },
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
-    "server/**/*.ts",
     "../shared/**/*.ts"
   ],
   "exclude": ["node_modules"]

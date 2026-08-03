@@ -10,6 +10,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     Avatar: typeof import('./components/dialog/Avatar.vue')['default']
     BaseSettings: typeof import('./components/editor/BaseSettings.vue')['default']
+    JsonPreview: typeof import('./components/JsonPreview.vue')['default']
     LoadingScreen: typeof import('./components/LoadingScreen.vue')['default']
     MacMenuBar: typeof import('./components/MacMenuBar.vue')['default']
     MacWindowControls: typeof import('./components/MacWindowControls.vue')['default']
@@ -18,8 +19,6 @@ declare module 'vue' {
     MessageList: typeof import('./components/dialog/MessageList.vue')['default']
     MobileSidebar: typeof import('./components/MobileSidebar.vue')['default']
     ReplyRules: typeof import('./components/editor/ReplyRules.vue')['default']
-    RouterLink: typeof import('vue-router')['RouterLink']
-    RouterView: typeof import('vue-router')['RouterView']
     UrlMatching: typeof import('./components/editor/UrlMatching.vue')['default']
   }
 }

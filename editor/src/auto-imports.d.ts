@@ -6,10 +6,8 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-  const ApiTimeoutError: typeof import('./composables/useApi')['ApiTimeoutError']
   const EffectScope: typeof import('vue')['EffectScope']
   const acceptHMRUpdate: typeof import('pinia')['acceptHMRUpdate']
-  const api: typeof import('./composables/useApi')['api']
   const computed: typeof import('vue')['computed']
   const createApp: typeof import('vue')['createApp']
   const createPinia: typeof import('pinia')['createPinia']
@@ -86,7 +84,4 @@ declare global {
   // @ts-ignore
   export type { Component, Slot, Slots, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
-  // @ts-ignore
-  export type { ApiTimeoutError } from './composables/useApi'
-  import('./composables/useApi')
 }
