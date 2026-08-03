@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { MessageConfigWithRole } from '@shared/types'
+import type { MessageConfigWithRole } from '~~/shared/types'
 
-const appStore = useAppStore()
-const appDataManager = useAppDataManager()
+const editorStore = useEditorStore()
+const appDataManager = useEditorDataManager()
 
 const items = ref<Record<string, MessageConfigWithRole[]>>({})
 const newItem = ref('')
@@ -24,7 +24,7 @@ async function fetchConfig() {
   loading.value = true
   dbConnectionError.value = false
   try {
-    const data = appStore.datas?.urlTriggers
+    const data = editorStore.editorDatas?.urlTriggers
     if (data) {
       items.value = data || {}
       isDirty.value = false
@@ -179,7 +179,7 @@ const itemsCount = computed(() => Object.keys(items.value).length)
       </div>
     </div>
 
-    <MessageList v-model="showEditor" :keyword="editingKey" :messages="getEditingMessages()" :show-loading-time="true" keyword-label="查询字符串" @update:messages="updateItemMessages" @update:keyword="updateItemKeyword" />
+    <DialogMessageList v-model="showEditor" :keyword="editingKey" :messages="getEditingMessages()" :show-loading-time="true" keyword-label="查询字符串" @update:messages="updateItemMessages" @update:keyword="updateItemKeyword" />
   </article>
 </template>
 
@@ -215,8 +215,8 @@ const itemsCount = computed(() => Object.keys(items.value).length)
   background: rgb(255, 255, 255);
   border: none;
   box-shadow: none;
-  overflow-y: auto;
-  height: 100%;
+  
+  height: 100%; overflow-y: auto;
 }
 .dark .panel-card { background: #1a1c1e; }
 @media (max-width: 768px) {

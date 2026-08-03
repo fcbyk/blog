@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { ActionMenuItem, ActionMenu } from '@shared/types/menu'
+import type { ActionMenuItem, ActionMenu } from '~~/shared/types/menu'
 
-const appStore = useAppStore()
-const appDataManager = useAppDataManager()
+const editorStore = useEditorStore()
+const appDataManager = useEditorDataManager()
 
 const menuItems = ref<ActionMenu>([])
 
@@ -39,7 +39,7 @@ const dragOverChildIndex = ref<{parentIndex: number, childIndex: number} | null>
 async function fetchConfig() {
   loading.value = true
   try {
-    const data = appStore.datas?.baseConfig
+    const data = editorStore.editorDatas?.baseConfig
     if (data) {
       menuItems.value = data.menu || []
       isDirty.value = false
@@ -379,7 +379,7 @@ const editingMessages = computed(() => {
     </div>
     </Teleport>
 
-    <MessageList v-model="showEditor" :keyword="editingKeyword" :messages="editingMessages" :title="isAddingChild ? '编辑子菜单项' : (editingIndex !== null ? menuItems[editingIndex]?.label || '编辑菜单项' : '添加菜单项')" keyword-label="菜单名称" :show-loading-time="true" :editable="!isAddingChild && editingIndex !== null" @update:messages="handleSaveMenuItem" @update:keyword="handleUpdateKeyword" />
+    <DialogMessageList v-model="showEditor" :keyword="editingKeyword" :messages="editingMessages" :title="isAddingChild ? '编辑子菜单项' : (editingIndex !== null ? menuItems[editingIndex]?.label || '编辑菜单项' : '添加菜单项')" keyword-label="菜单名称" :show-loading-time="true" :editable="!isAddingChild && editingIndex !== null" @update:messages="handleSaveMenuItem" @update:keyword="handleUpdateKeyword" />
   </article>
 </template>
 
@@ -388,7 +388,7 @@ const editingMessages = computed(() => {
 .help-slide-enter-from, .help-slide-leave-to { max-height: 0; opacity: 0; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; }
 .card-title { font-size: 1.45rem; letter-spacing: -0.03em; margin: 0; color: #9d6547; text-transform: uppercase; letter-spacing: 0.16em; font-size: 16px; font-weight: 500; }
 .dark .card-title { color: #c0a090; }
-.panel-card { margin: 0; padding: 24px 32px 32px; border-radius: 16px; background: rgb(255, 255, 255); border: none; box-shadow: none; overflow-y: auto; height: 100%; }
+.panel-card { margin: 0; padding: 24px 32px 32px; border-radius: 16px; background: rgb(255, 255, 255); border: none; box-shadow: none;  height: 100%; overflow-y: auto; }
 .dark .panel-card { background: #1a1c1e; }
 @media (max-width: 768px) { .panel-card { padding: 16px; border-radius: 0; } .card-head { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 16px; } .card-title { font-size: 18px; } }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }

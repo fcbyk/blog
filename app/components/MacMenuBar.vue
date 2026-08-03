@@ -7,12 +7,14 @@ const emit = defineEmits<{
 }>()
 
 const route = useRoute()
+const editorStore = useEditorStore()
 const showMenu = ref(false)
+const showDataMenu = ref(false)
 const currentDateTime = ref('')
 
 const isOnQAPage = computed(() => route.path.startsWith('/q/'))
+const isOnEditor = computed(() => route.path === '/editor')
 
-let hideTimer: ReturnType<typeof setTimeout> | null = null
 let timer: ReturnType<typeof setInterval> | null = null
 
 const formatDateTime = () => {
@@ -34,16 +36,31 @@ const toggleMenu = () => {
   showMenu.value = !showMenu.value
 }
 
-const hideMenuWithDelay = () => {
-  hideTimer = setTimeout(() => {
-    showMenu.value = false
-  }, 200)
+const hideMenu = () => {
+  showMenu.value = false
 }
 
-const cancelHide = () => {
-  if (hideTimer) {
-    clearTimeout(hideTimer)
-    hideTimer = null
+const hideDataMenu = () => {
+  showDataMenu.value = false
+}
+
+const handleImport = () => {
+  showDataMenu.value = false
+  editorStore.openImportPopup()
+}
+
+const handleExport = async () => {
+  showDataMenu.value = false
+  const ok = await editorStore.exportAllData()
+  if (!ok) {
+    alert('导出失败，请重试')
+  }
+}
+
+const handleClear = () => {
+  showDataMenu.value = false
+  if (confirm('确定要清空所有编辑器数据吗？此操作不可撤销。')) {
+    editorStore.clearAllData()
   }
 }
 
@@ -58,7 +75,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (timer) clearInterval(timer)
-  if (hideTimer) clearTimeout(hideTimer)
 })
 </script>
 
@@ -69,7 +85,7 @@ onUnmounted(() => {
         <img src="/favicon.svg" alt="Logo" class="w-5 h-5" />
       </div>
 
-      <div class="relative hidden md:block" @mouseenter="showMenu = true" @mouseleave="hideMenuWithDelay">
+      <div class="relative hidden md:block" @mouseenter="showMenu = true" @mouseleave="hideMenu">
         <button
           class="text-sm font-medium hover:bg-white/20 px-2 py-1 rounded transition-colors cursor-default"
           @click="toggleMenu"
@@ -79,9 +95,7 @@ onUnmounted(() => {
 
         <div
           v-show="showMenu"
-          class="absolute top-full left-0 mt-1 w-48 bg-white/90 dark:bg-[#1a1c1e]/95 backdrop-blur-xl rounded-lg py-1 overflow-hidden border border-gray-200 dark:border-[#2b2d30] shadow-sm"
-          @mouseenter="cancelHide"
-          @mouseleave="hideMenuWithDelay"
+          class="absolute top-full left-0 w-48 bg-white/90 dark:bg-[#1a1c1e]/95 backdrop-blur-xl rounded-lg py-1 overflow-hidden border border-gray-200 dark:border-[#2b2d30] shadow-sm"
         >
           <NuxtLink
             :to="isOnQAPage ? route.fullPath : '/'"
@@ -98,6 +112,44 @@ onUnmounted(() => {
           >
             <IconBlog />
             <span>Blog</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 编辑器数据菜单（仅编辑器页面显示） -->
+      <div v-if="isOnEditor" class="relative hidden md:block" @mouseenter="showDataMenu = true" @mouseleave="hideDataMenu">
+        <button
+          class="text-sm font-medium hover:bg-white/20 px-2 py-1 rounded transition-colors cursor-default"
+          @click="showDataMenu = !showDataMenu"
+        >
+          Editor
+        </button>
+
+        <div
+          v-show="showDataMenu"
+          class="absolute top-full left-0 w-36 bg-white/90 dark:bg-[#1a1c1e]/95 backdrop-blur-xl rounded-lg py-1 overflow-hidden border border-gray-200 dark:border-[#2b2d30] shadow-sm"
+        >
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="handleImport"
+          >
+            导入数据
+          </button>
+
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="handleExport"
+          >
+            导出数据
+          </button>
+
+          <div class="border-t border-gray-200 dark:border-[#2b2d30] my-1"></div>
+
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors border-none cursor-pointer"
+            @click="handleClear"
+          >
+            清空数据
           </button>
         </div>
       </div>

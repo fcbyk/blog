@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { MessageConfig } from '@shared/types/message'
-import type { KeywordReplyConfig, RegexReplyConfig } from '@shared/types/config'
+import type { MessageConfig } from '~~/shared/types/message'
+import type { KeywordReplyConfig, RegexReplyConfig } from '~~/shared/types/config'
 
 interface ReplyRuleItem {
   id: string
@@ -9,8 +9,8 @@ interface ReplyRuleItem {
   order?: number
 }
 
-const appStore = useAppStore()
-const appDataManager = useAppDataManager()
+const editorStore = useEditorStore()
+const appDataManager = useEditorDataManager()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -43,7 +43,7 @@ async function fetchConfig() {
   helloMessages.value = []
 
   try {
-    const keywordData = appStore.datas?.keywordReplies
+    const keywordData = editorStore.editorDatas?.keywordReplies
     if (keywordData) {
       const keywordRules: ReplyRuleItem[] = Object.entries(keywordData).map(([key, messages]) => ({
         id: key,
@@ -53,7 +53,7 @@ async function fetchConfig() {
       replyRules.value = [...keywordRules]
     }
 
-    const regexData = appStore.datas?.regexReplies
+    const regexData = editorStore.editorDatas?.regexReplies
     if (regexData && Array.isArray(regexData)) {
       const regexRules: ReplyRuleItem[] = regexData.map((item, index) => ({
         id: item.pattern || '',
@@ -65,7 +65,7 @@ async function fetchConfig() {
       replyRules.value = [...replyRules.value, ...regexRules]
     }
 
-    const baseData = appStore.datas?.baseConfig
+    const baseData = editorStore.editorDatas?.baseConfig
     if (baseData && baseData.helloMsg) {
       helloMessages.value = Array.isArray(baseData.helloMsg) ? baseData.helloMsg : []
     }
@@ -397,7 +397,7 @@ onMounted(() => { fetchConfig() })
       <p class="mt-2 text-[13px] text-[#b89a85] dark:text-[#8b8b8b]">添加第一个规则开始配置吧！</p>
     </div>
 
-    <MessageList v-model="showEditor" :keyword="editingRuleId === '__hello__' ? '问候语' : editingRuleId" :messages="getEditingMessages()" :action-label="editingRuleId === '__hello__' ? '打招呼' : '回复'" :show-loading-time="true" :keyword-label="editingRuleId === '__hello__' ? '问候语' : (replyRules.find(r => r.id === editingRuleId)?.type === 'regex' ? '正则表达式' : '关键词')" :editable="editingRuleId !== '__hello__'" :editable-role="false" @update:messages="updateRuleMessages" @update:keyword="updateRuleKeyword" />
+    <DialogMessageList v-model="showEditor" :keyword="editingRuleId === '__hello__' ? '问候语' : editingRuleId" :messages="getEditingMessages()" :action-label="editingRuleId === '__hello__' ? '打招呼' : '回复'" :show-loading-time="true" :keyword-label="editingRuleId === '__hello__' ? '问候语' : (replyRules.find(r => r.id === editingRuleId)?.type === 'regex' ? '正则表达式' : '关键词')" :editable="editingRuleId !== '__hello__'" :editable-role="false" @update:messages="updateRuleMessages" @update:keyword="updateRuleKeyword" />
 
     <Teleport to="body">
     <div v-if="showOrderEditor" class="fixed inset-0 bg-black/50 flex items-center justify-center z-9999 animate-fade-in">
@@ -463,8 +463,8 @@ onMounted(() => { fetchConfig() })
   background: rgb(255, 255, 255);
   border: none;
   box-shadow: none;
-  overflow-y: auto;
-  height: 100%;
+  
+  height: 100%; overflow-y: auto;
 }
 .dark .panel-card { background: #1a1c1e; }
 @media (max-width: 768px) {

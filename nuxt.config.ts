@@ -9,7 +9,8 @@ export default defineNuxtConfig({
     "/": { ssr: false },
     "/blog/**": { ssr: false },
     "/q/*": { ssr: false },
-    "/hand": { ssr: false }
+    "/hand": { ssr: false },
+    "/editor": { ssr: false }
   },
   colorMode: {
     classSuffix: "",
@@ -68,7 +69,8 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    githubRawBase: ""
+    githubRawBase: "",
+    editorPassword: ""
   },
 
   vite: {

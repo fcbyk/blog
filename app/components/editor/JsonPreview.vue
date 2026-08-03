@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Datas } from '@shared/types'
+import type { Datas } from '~~/shared/types'
 
 const props = defineProps<{
   page: 'base' | 'reply' | 'url' | 'menu'
@@ -69,7 +69,7 @@ watch(() => props.datas, () => {
   }
 }, { deep: true })
 
-const appDataManager = useAppDataManager()
+const appDataManager = useEditorDataManager()
 
 // 切换 Tab/页面时同步
 watch(activeDataKey, (key) => {

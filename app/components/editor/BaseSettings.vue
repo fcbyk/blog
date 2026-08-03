@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { AvatarConfig } from '@shared/types/config'
+import type { AvatarConfig } from '~~/shared/types/config'
 
-const appStore = useAppStore()
-const appDataManager = useAppDataManager()
+const editorStore = useEditorStore()
+const appDataManager = useEditorDataManager()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -24,7 +24,7 @@ const userAvatarError = ref(false)
 async function fetchConfig() {
   loading.value = true
   try {
-    const data = appStore.datas?.baseConfig
+    const data = editorStore.editorDatas?.baseConfig
     if (data && data.avatar) {
       avatarConfig.value = {
         bot: data.avatar.bot,
@@ -155,7 +155,7 @@ onMounted(() => {
       </div>
     </div>
 
-    <Avatar v-model="showAvatarDialog" :type="editingAvatarType" :avatar-url="avatarConfig[editingAvatarType]" @save="handleAvatarSave" />
+    <DialogAvatar v-model="showAvatarDialog" :type="editingAvatarType" :avatar-url="avatarConfig[editingAvatarType]" @save="handleAvatarSave" />
   </article>
 </template>
 
@@ -180,8 +180,8 @@ onMounted(() => {
   background: rgb(255, 255, 255);
   border: none;
   box-shadow: none;
-  overflow-y: auto;
-  height: 100%;
+  
+  height: 100%; overflow-y: auto;
 }
 .dark .panel-card {
   background: #1a1c1e;
