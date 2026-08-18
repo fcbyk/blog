@@ -49,7 +49,7 @@ async function loadContent() {
   loadTimeout.value = false
   try {
     const res: string = await api('/api/proxy/raw', {
-      query: { url: `/md/${target}` },
+      query: { url: `/blog/${target}` },
     }) as string
     if (activePath.value !== target) return
     contentCache.set(target, res)
