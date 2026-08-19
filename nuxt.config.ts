@@ -10,7 +10,8 @@ export default defineNuxtConfig({
     "/blog/**": { ssr: false },
     "/q/*": { ssr: false },
     "/hand": { ssr: false },
-    "/editor": { ssr: false }
+    "/editor": { ssr: false },
+    "/nav": { ssr: false }
   },
   colorMode: {
     classSuffix: "",

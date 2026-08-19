@@ -8,12 +8,15 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const editorStore = useEditorStore()
+const navStore = useNavStore()
 const showMenu = ref(false)
 const showDataMenu = ref(false)
+const showNavMenu = ref(false)
 const currentDateTime = ref('')
 
 const isOnQAPage = computed(() => route.path.startsWith('/q/'))
 const isOnEditor = computed(() => route.path === '/editor')
+const isOnNav = computed(() => route.path === '/nav')
 
 let timer: ReturnType<typeof setInterval> | null = null
 
@@ -62,6 +65,28 @@ const handleClear = () => {
   if (confirm('确定要清空所有编辑器数据吗？此操作不可撤销。')) {
     editorStore.clearAllData()
   }
+}
+
+/* Nav 菜单（/nav 页面） */
+const hideNavMenu = () => {
+  showNavMenu.value = false
+}
+
+const handleNavEdit = () => {
+  navStore.toggleEdit()
+  showNavMenu.value = false
+}
+const handleNavImport = () => {
+  navStore.dispatch('import')
+  showNavMenu.value = false
+}
+const handleNavExport = () => {
+  navStore.dispatch('export')
+  showNavMenu.value = false
+}
+const handleNavClear = () => {
+  navStore.dispatch('clear')
+  showNavMenu.value = false
 }
 
 const openSidebar = () => {
@@ -150,6 +175,51 @@ onUnmounted(() => {
             @click="handleClear"
           >
             清空数据
+          </button>
+        </div>
+      </div>
+
+      <!-- Nav 菜单（仅书签管理页显示） -->
+      <div v-if="isOnNav" class="relative hidden md:block" @mouseenter="showNavMenu = true" @mouseleave="hideNavMenu">
+        <button
+          class="text-sm font-medium hover:bg-white/20 px-2 py-1 rounded transition-colors cursor-default"
+          @click="showNavMenu = !showNavMenu"
+        >
+          书签
+        </button>
+
+        <div
+          v-show="showNavMenu"
+          class="absolute top-full left-0 w-32 bg-white/90 dark:bg-[#1a1c1e]/95 backdrop-blur-xl rounded-lg py-1 overflow-hidden border border-gray-200 dark:border-[#2b2d30] shadow-sm"
+        >
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="handleNavEdit"
+          >
+            {{ navStore.editMode ? '✓ 完成编辑' : '编辑模式' }}
+          </button>
+
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="handleNavImport"
+          >
+            导入书签
+          </button>
+
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="handleNavExport"
+          >
+            导出书签
+          </button>
+
+          <div class="border-t border-gray-200 dark:border-[#2b2d30] my-1"></div>
+
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors border-none cursor-pointer"
+            @click="handleNavClear"
+          >
+            清空书签
           </button>
         </div>
       </div>
