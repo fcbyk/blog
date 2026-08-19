@@ -114,6 +114,15 @@ const toggleTheme = () => {
             <span>Blog</span>
           </NuxtLink>
 
+          <NuxtLink 
+            to="/nav"
+            class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-indigo-50 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors text-gray-700 dark:text-[#c7cbd1]"
+            @click="handleClose"
+          >
+            <IconBookmark />
+            <span>浏览器书签</span>
+          </NuxtLink>
+
           <!-- 博客文章列表（仅 blog 页面显示） -->
           <template v-if="isOnBlogPage && blogTreeError">
             <div class="border-t border-gray-200 dark:border-[#2b2d30] my-1"></div>

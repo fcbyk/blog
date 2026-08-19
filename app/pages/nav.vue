@@ -73,10 +73,9 @@ function getDomain(url: string): string {
   try { return new URL(url).hostname } catch { return url }
 }
 
-function getDefaultIcon(url: string): string {
-  const domain = getDomain(url)
-  if (!domain) return ''
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`
+function getDefaultIcon(_url?: string): string {
+  // 不再使用 Google favicon 服务；无图标时返回空，由卡片回退到默认地球图标
+  return ''
 }
 
 function normalizeUrl(raw: string): string {
@@ -428,6 +427,25 @@ function triggerImport() {
   fileInputRef.value?.click()
 }
 
+/* 从导入的 <A> 标签提取图标：
+   - 优先采用标准 ICON_URI（URL 形式）
+   - 其次 ICON 属性若为非 data: 的 URL 才采用（base64 直接忽略）
+   - 都没有则返回空，由卡片回退到默认地球图标 */
+function extractImportIcon(a: HTMLAnchorElement, baseUrl: string): string {
+  const iconUri = a.getAttribute('icon_uri')
+  if (iconUri && /^https?:\/\//i.test(iconUri.trim())) {
+    return iconUri.trim()
+  }
+  const icon = a.getAttribute('icon')
+  if (icon && !/^data:/i.test(icon.trim())) {
+    const trimmed = icon.trim()
+    if (/^https?:\/\//i.test(trimmed)) return trimmed
+    // 可能是相对路径，基于书签 URL 解析为绝对地址
+    try { return new URL(trimmed, baseUrl).toString() } catch {}
+  }
+  return ''
+}
+
 async function handleImportFile(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input.files?.[0]
@@ -451,12 +469,13 @@ async function handleImportFile(e: Event) {
                 added.skipped++
               } else {
                 const name = (a.textContent || '').trim() || getDomain(norm)
+                const icon = extractImportIcon(a, norm)
                 items.value.unshift({
                   id: uid(),
                   type: 'bookmark',
                   url: norm,
                   name,
-                  icon: getDefaultIcon(norm),
+                  icon,
                   parentId,
                   createdAt: Date.now()
                 })
@@ -510,7 +529,10 @@ function exportBookmarks() {
       out += `${ind}</DL><p>\n`
     }
     for (const b of bookmarks) {
-      out += `${ind}<DT><A HREF="${escapeAttr(b.url || '')}">${escapeAttr(b.name)}</A>\n`
+      const iconAttr = (b.icon && !/^data:/i.test(b.icon))
+        ? ` ICON_URI="${escapeAttr(b.icon)}"`
+        : ''
+      out += `${ind}<DT><A HREF="${escapeAttr(b.url || '')}"${iconAttr}>${escapeAttr(b.name)}</A>\n`
     }
     return out
   }
@@ -611,7 +633,7 @@ onUnmounted(() => {
 <template>
   <div class="h-full w-full flex items-center justify-center">
     <main
-      class="mac-window relative z-10 w-full h-full md:w-[70%] md:h-[80%] rounded-none md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(92,61,43,0.2)] dark:shadow-none dark:border dark:border-[rgba(255,255,255,0.08)]"
+      class="mac-window md:mt-5 relative z-10 w-full h-full md:w-[80%] md:h-[85%] rounded-none md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(92,61,43,0.2)] dark:shadow-none dark:border dark:border-[rgba(255,255,255,0.08)]"
     >
       <div class="relative w-full h-full pt-10 md:pt-0 rounded-none md:rounded-[14px] bg-[#f5f3ee] dark:bg-[#0d1117] overflow-hidden flex flex-col shadow-none md:shadow-xl dark:shadow-none">
         <!-- 窗口标题栏：左 MacWindowControls + 面包屑｜右 搜索框 -->
@@ -692,11 +714,10 @@ onUnmounted(() => {
               <!-- Empty -->
               <template v-if="isEmpty">
                 <div v-if="searchQuery.trim()" class="empty">
-                  <span class="icon">🔎</span>
                   <div>没有匹配 "{{ searchQuery }}" 的内容</div>
                 </div>
-                <div v-else-if="currentFolderId" class="empty">
-                  <span class="icon">📂</span>
+                <div v-else-if="currentFolderId && !navStore.editMode" class="empty">
+                  <IconFolder class="empty-folder-svg" />
                   <div>这个目录是空的</div>
                   <div class="hint">在上方输入网址添加，或新建子目录</div>
                 </div>
@@ -718,7 +739,7 @@ onUnmounted(() => {
                   >✏️</button>
                 </div>
                 <div class="folder-body">
-                  <div class="folder-icon">📁</div>
+                  <div class="folder-icon"><IconFolder class="folder-svg" /></div>
                   <div class="folder-name" :title="f.name">{{ f.name }}</div>
                   <div class="folder-meta">{{ countInFolder(f.id) }} 项</div>
                 </div>
@@ -743,17 +764,15 @@ onUnmounted(() => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <div class="icon-wrap">
-                    <img
-                      v-if="b.icon && !failedIconIds.has(b.id)"
-                      class="icon"
-                      :src="b.icon"
-                      :data-url="b.url"
-                      alt=""
-                      @error="onIconError(b.id)"
-                    >
-                    <span v-else class="icon-emoji" aria-hidden="true">🌐</span>
-                  </div>
+                  <img
+                    v-if="b.icon && !failedIconIds.has(b.id)"
+                    class="icon"
+                    :src="b.icon"
+                    :data-url="b.url"
+                    alt=""
+                    @error="onIconError(b.id)"
+                  >
+                  <IconGlobe v-else class="icon-svg" aria-hidden="true" />
                   <div class="name" :title="b.name">{{ b.name }}</div>
                   <div class="url" :title="b.url">{{ getDomain(b.url || '') }}</div>
                 </a>
@@ -880,16 +899,15 @@ onUnmounted(() => {
 }
 
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px 20px 60px;
+  /* 中和 Tailwind 全局 .container 的响应式 max-width 与 auto 居中，
+     否则会限制网格宽度并产生左右留白 */
+  max-width: none;
+  margin: 0;
+  width: 100%;
+  padding: 24px 20px 10px;
 }
 
 /* Breadcrumb */
-.btn-ghost.active,
-.btn-ghost.danger {
-  /* danger 占位 - 通过 .danger 类设置 */
-}
 .btn-ghost.danger {
   background: transparent;
   border-color: #d93d3d;
@@ -1058,45 +1076,28 @@ onUnmounted(() => {
   flex: 1;
   width: 100%;
 }
-.icon-wrap {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5f3ee;
-  border-radius: 8px;
-  overflow: hidden;
-  flex-shrink: 0;
-  border: 1px solid #ebe7dd;
-}
-.dark .icon-wrap {
-  background: #0d1117;
-  border-color: #21262d;
-}
 .icon {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
   display: block;
 }
-.icon-emoji {
-  font-size: 32px;
-  line-height: 1;
-  display: inline-block;
+.icon-svg {
+  width: 40px;
+  height: 40px;
+  color: #6b7280;
+}
+.dark .icon-svg {
+  color: #8b949e;
 }
 .name {
   font-size: 14px;
   font-weight: 500;
   text-align: center;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.3;
-  height: 2.6em;
   width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .url {
   font-size: 11px;
@@ -1127,32 +1128,22 @@ onUnmounted(() => {
   width: 100%;
 }
 .card.folder .folder-icon {
-  width: 56px;
-  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
-  background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(37, 99, 235, 0.04));
-  border: 1px solid #ebe7dd;
-  border-radius: 8px;
 }
-.dark .card.folder .folder-icon {
-  background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(88, 166, 255, 0.04));
-  border-color: #21262d;
+.card.folder .folder-icon .folder-svg {
+  width: 40px;
+  height: auto;
 }
 .card.folder .folder-name {
   font-size: 14px;
   font-weight: 500;
   text-align: center;
-  word-break: break-word;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.3;
-  height: 2.6em;
   width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .card.folder .folder-meta {
   margin-top: auto;
@@ -1264,6 +1255,12 @@ onUnmounted(() => {
   display: block;
   margin-bottom: 12px;
   opacity: 0.5;
+}
+.empty .empty-folder-svg {
+  display: block;
+  width: 48px;
+  height: auto;
+  margin: 0 auto 12px;
 }
 .empty .hint {
   margin-top: 6px;

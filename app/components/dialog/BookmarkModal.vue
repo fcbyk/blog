@@ -84,6 +84,14 @@ const previewName = ref('')
 const previewStatusText = ref('')
 const previewStatusKind = ref<'' | 'ok' | 'fail'>('')
 
+/* 图标加载失败标记：用于回退到默认地球图标（已去除 Google 兜底） */
+const previewFailed = ref(false)
+const editFailed = ref(false)
+watch([previewIcon, formIcon], () => {
+  previewFailed.value = false
+  editFailed.value = false
+})
+
 const formUrlRef = ref<HTMLInputElement | null>(null)
 const formNameRef = ref<HTMLInputElement | null>(null)
 const formFolderNameRef = ref<HTMLInputElement | null>(null)
@@ -100,10 +108,9 @@ function getDomain(url: string): string {
   try { return new URL(url).hostname } catch { return url }
 }
 
-function getDefaultIcon(url: string): string {
-  const domain = getDomain(url)
-  if (!domain) return ''
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`
+function getDefaultIcon(_url?: string): string {
+  // 不再使用 Google favicon 服务；无图标时返回空，由卡片回退到默认地球图标
+  return ''
 }
 
 function normalizeUrl(raw: string): string {
@@ -397,11 +404,13 @@ async function onReIdentify() {
   }
 }
 
-function onIconError(e: Event, url: string) {
+function onIconError(e: Event, _url: string) {
   const img = e.target as HTMLImageElement
   if (img.dataset.fb) return
   img.dataset.fb = '1'
-  img.src = getDefaultIcon(url)
+  // 已去除 Google 兜底：加载失败时切换到默认地球图标
+  if (img.classList.contains('preview-icon')) editFailed.value = true
+  else previewFailed.value = true
 }
 
 /* ================================================================
@@ -568,11 +577,13 @@ function onDeleteClick() {
                 </div>
                 <div :class="['preview', previewVisible ? 'visible' : '']">
                   <img
+                    v-if="previewIcon && !previewFailed"
                     id="modal-preview-icon"
                     :src="previewIcon"
                     alt=""
                     @error="(e) => onIconError(e, previewUrl)"
                   >
+                  <IconGlobe v-else class="preview-globe" aria-hidden="true" />
                   <div class="meta">
                     <input
                       ref="previewNameRef"
@@ -604,12 +615,14 @@ function onDeleteClick() {
               <template v-else-if="purpose === 'edit' && editingId && getItem(editingId)?.type === 'bookmark'">
                 <div class="icon-row">
                   <img
+                    v-if="formIcon && !editFailed"
                     class="preview-icon"
-                    :src="formIcon || getDefaultIcon(formUrl)"
+                    :src="formIcon"
                     :data-url="formUrl"
                     alt=""
                     @error="(e) => onIconError(e, formUrl)"
                   >
+                  <IconGlobe v-else class="preview-icon preview-globe" aria-hidden="true" />
                 </div>
                 <input
                   ref="formNameRef"
@@ -880,6 +893,28 @@ function onDeleteClick() {
 .dark .preview img {
   background: #0d1117;
   border-color: #30363d;
+}
+.preview-globe {
+  width: 24px;
+  height: 24px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+.preview-globe.preview-icon {
+  width: 40px;
+  height: 40px;
+  padding: 6px;
+  border-radius: 6px;
+  background: #f5f3ee;
+  border: 1px solid #ebe7dd;
+  box-sizing: border-box;
+}
+.dark .preview-globe {
+  color: #8b949e;
+}
+.dark .preview-globe.preview-icon {
+  background: #0d1117;
+  border-color: #21262d;
 }
 .preview .meta {
   display: flex;
