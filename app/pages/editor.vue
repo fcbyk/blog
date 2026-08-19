@@ -6,6 +6,30 @@ import MenuSettings from '~/components/editor/MenuSettings.vue'
 import JsonPreview from '~/components/editor/JsonPreview.vue'
 import { DEFAULT_CONFIG } from '~~/shared/defaultConfig'
 
+const TOKEN_KEY = 'admin-token'
+
+const isChecking = ref(true)
+const isLoggedIn = ref(false)
+
+onMounted(async () => {
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (token) {
+    try {
+      const res = await $fetch<{ valid: boolean }>('/api/auth/verify', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.valid) {
+        isLoggedIn.value = true
+        isChecking.value = false
+        return
+      }
+    } catch {}
+    localStorage.removeItem(TOKEN_KEY)
+  }
+  isChecking.value = false
+  navigateTo('/')
+})
+
 const editorStore = useEditorStore()
 const editorDataManager = useEditorDataManager()
 
@@ -79,51 +103,26 @@ function handleClose() {
 // ─── 数据源弹窗 ───
 const sourceType = ref<'local' | 'github' | null>(null)
 
-// ─── 本站数据（密码保护） ───
-const localPassword = ref('')
+// ─── 本站数据（确认后直接加载） ───
 const localLoading = ref(false)
-const localError = ref('')
-const localShaking = ref(false)
 
 function openLocalSource() {
   sourceType.value = 'local'
-  localPassword.value = ''
-  localError.value = ''
-  setTimeout(() => {
-    const input = document.querySelector<HTMLInputElement>('#local-password-input')
-    input?.focus()
-  }, 100)
 }
 
 async function loadLocalData() {
-  if (!localPassword.value) {
-    localError.value = '请输入密码'
-    localShaking.value = true; setTimeout(() => { localShaking.value = false }, 500)
-    return
-  }
   localLoading.value = true
-  localError.value = ''
   try {
-    const r = await $fetch<{ success: boolean }>('/api/auth/verify-editor', {
-      method: 'POST',
-      body: { password: localPassword.value }
-    })
-    if (r.success) {
-      const data = editorDataManager.loadFromApp()
-      if (data) {
-        editorStore.setDatas(data)
-        localPassword.value = ''
-        closeSourcePopup()
-        showToast('已加载本站数据')
-      } else {
-        localError.value = '暂无数据，请先访问首页加载配置'
-      }
+    const data = editorDataManager.loadFromApp()
+    if (data) {
+      editorStore.setDatas(data)
+      closeSourcePopup()
+      showToast('已加载本站数据')
     } else {
-      localError.value = '密码错误'
-      localShaking.value = true; setTimeout(() => { localShaking.value = false }, 500)
+      showToast('暂无数据，请先访问首页加载配置')
     }
   } catch {
-    localError.value = '验证失败'
+    showToast('加载失败')
   } finally {
     localLoading.value = false
   }
@@ -205,7 +204,16 @@ watch([viewMode, () => editorStore.activePage], () => {
 </script>
 
 <template>
-  <div class="h-full flex items-center justify-center p-0 pt-8">
+  <div v-if="isChecking" class="h-full flex items-center justify-center">
+    <div class="flex items-center gap-2 text-[#7a5a48] dark:text-gray-400">
+      <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+      </svg>
+      <span class="text-sm">检查登录状态...</span>
+    </div>
+  </div>
+  <div v-else-if="isLoggedIn" class="h-full flex items-center justify-center p-0 pt-8">
     <main class="mac-window md:mb-4 relative z-1 w-full h-full md:w-[70%] md:h-[90%] min-h-0 rounded-none md:rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(92,61,43,0.2)] dark:shadow-none dark:border dark:border-[rgba(255,255,255,0.08)]">
       <div class="flex w-full h-full bg-[rgba(255,250,244,0.92)] dark:bg-[#1a1c1e]/92 backdrop-blur-md relative">
         <!-- 窗口控制 + 视图切换 -->
@@ -254,7 +262,7 @@ watch([viewMode, () => editorStore.activePage], () => {
     <!-- 数据源弹窗 -->
     <Teleport to="body">
       <div v-if="editorStore.showImportPopup" class="fixed inset-0 bg-black/50 flex items-center justify-center z-9999">
-        <div :class="['bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden', sourceType === 'local' && localShaking ? 'animate-shake' : '']">
+        <div class="bg-white dark:bg-[#1a1c1e] rounded-2xl w-[90%] max-w-md shadow-[0_20px_60px_rgba(0,0,0,0.3)] overflow-hidden">
           <!-- 标题栏 -->
           <div class="flex justify-between items-center p-4 px-5 border-b border-[#f0e6dd] dark:border-[#2b2d30]">
             <MacWindowControls :show-close="true" :show-minimize="false" :show-maximize="false" :clickable="true" @close="closeSourcePopup" />
@@ -263,9 +271,6 @@ watch([viewMode, () => editorStore.activePage], () => {
           </div>
 
           <div class="p-5">
-            <p class="text-xs text-[#ff9800] dark:text-[#ffb74d] bg-[rgba(255,152,0,0.08)] rounded-lg px-3 py-2 mb-4">
-              导入数据将覆盖当前所有编辑内容，请确认后再操作
-            </p>
             <!-- 未选择类型 → 两个按钮 -->
             <template v-if="!sourceType">
               <button
@@ -278,7 +283,7 @@ watch([viewMode, () => editorStore.activePage], () => {
                   </div>
                   <div>
                     <div class="text-sm text-[#32241b] dark:text-[#c7cbd1] font-medium">本站数据</div>
-                    <div class="text-xs text-[#8f949a] mt-0.5">使用网站当前配置数据（需密码验证）</div>
+                    <div class="text-xs text-[#8f949a] mt-0.5">使用网站当前配置数据</div>
                   </div>
                 </div>
               </button>
@@ -298,22 +303,14 @@ watch([viewMode, () => editorStore.activePage], () => {
               </button>
             </template>
 
-            <!-- 本站数据：密码输入 -->
+            <!-- 本站数据：确认提示 -->
             <template v-else-if="sourceType === 'local'">
-              <div class="mb-1.5">
-                <label class="text-[13px] text-[#7a5a48] dark:text-[#a0a5ab] font-medium">输入密码</label>
-              </div>
-              <div class="relative mb-1">
-                <input id="local-password-input" v-model="localPassword" type="password" placeholder="输入密码以加载本站数据" :disabled="localLoading"
-                  :class="['w-full px-4 py-3 border-2 rounded-xl bg-[#fffdf9] dark:bg-[#2b2d30] text-[#32241b] dark:text-gray-100 outline-none text-sm transition-all duration-200', localLoading ? 'opacity-50' : '', localError ? 'border-[#ff5f57]' : 'border-[rgba(121,82,57,0.16)] dark:border-[#3a3c3f] focus:border-[#cb7d52]']"
-                  @keydown="(e: KeyboardEvent) => { if (!e.isComposing && e.key === 'Enter') loadLocalData() }"
-                />
-                <svg v-if="localLoading" class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#cb7d52] animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-              </div>
-              <p v-if="localError" class="text-[#ff5f57] text-xs mb-4">{{ localError }}</p>
-              <div class="flex gap-2 mt-4">
+              <p class="text-xs text-[#ff9800] dark:text-[#ffb74d] bg-[rgba(255,152,0,0.08)] rounded-lg px-3 py-2 mb-4">
+                导入数据将覆盖当前所有编辑内容，请确认后再操作
+              </p>
+              <div class="flex gap-2">
                 <button class="flex-1 py-2.5 px-4 border-none rounded-lg text-xs cursor-pointer bg-[#f5f5f5] dark:bg-[#2b2d30] text-[#6f4c39] dark:text-[#c7cbd1] hover:bg-[#e8e8e8]" @click="sourceType = null">取消</button>
-                <button class="flex-1 py-2.5 px-4 border-none rounded-lg text-xs cursor-pointer bg-[#ce8256] text-white hover:bg-[#b8714a] disabled:opacity-50" :disabled="localLoading" @click="loadLocalData">{{ localLoading ? '加载中...' : '确定' }}</button>
+                <button class="flex-1 py-2.5 px-4 border-none rounded-lg text-xs cursor-pointer bg-[#ce8256] text-white hover:bg-[#b8714a] disabled:opacity-50" :disabled="localLoading" @click="loadLocalData">{{ localLoading ? '加载中...' : '确认导入' }}</button>
               </div>
             </template>
 

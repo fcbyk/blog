@@ -70,8 +70,7 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
-    githubRawBase: "",
-    editorPassword: ""
+    githubRawBase: ""
   },
 
   vite: {

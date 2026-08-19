@@ -12,7 +12,11 @@ const navStore = useNavStore()
 const showMenu = ref(false)
 const showDataMenu = ref(false)
 const showNavMenu = ref(false)
+const showAdminMenu = ref(false)
 const currentDateTime = ref('')
+
+const TOKEN_KEY = 'admin-token'
+const isLoggedIn = ref(false)
 
 const isOnQAPage = computed(() => route.path.startsWith('/q/'))
 const isOnEditor = computed(() => route.path === '/editor')
@@ -93,9 +97,21 @@ const openSidebar = () => {
   emit('openSidebar')
 }
 
-onMounted(() => {
+onMounted(async () => {
   formatDateTime()
   timer = setInterval(formatDateTime, 60000)
+
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (token) {
+    try {
+      const res = await $fetch<{ valid: boolean }>('/api/auth/verify', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.valid) {
+        isLoggedIn.value = true
+      }
+    } catch {}
+  }
 })
 
 onUnmounted(() => {
@@ -105,7 +121,7 @@ onUnmounted(() => {
 
 <template>
   <div class="fixed top-0 left-0 right-0 h-10 flex items-center justify-between px-4 z-50 bg-white/0 backdrop-blur-xl md:bg-transparent md:backdrop-blur-none text-gray-800 dark:text-gray-100">
-    <div class="flex items-center md:space-x-4">
+    <div class="flex items-center md:space-x-1">
       <div class="flex items-center">
         <img src="/favicon.svg" alt="Logo" class="w-5 h-5" />
       </div>
@@ -145,6 +161,43 @@ onUnmounted(() => {
           >
             <IconBookmark />
             <span>浏览器书签</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 管理员菜单（仅登录后显示） -->
+      <div v-if="isLoggedIn" class="relative hidden md:block" @mouseenter="showAdminMenu = true" @mouseleave="showAdminMenu = false">
+        <button
+          class="text-sm font-medium hover:bg-white/20 px-2 py-1 rounded transition-colors cursor-default"
+          @click="showAdminMenu = !showAdminMenu"
+        >
+          管理员
+        </button>
+
+        <div
+          v-show="showAdminMenu"
+          class="absolute top-full left-0 w-28 bg-white/90 dark:bg-[#1a1c1e]/95 backdrop-blur-xl rounded-lg py-1 overflow-hidden border border-gray-200 dark:border-[#2b2d30] shadow-sm"
+        >
+          <NuxtLink
+            to="/editor"
+            class="block w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors"
+            @click="showAdminMenu = false"
+          >
+            editor
+          </NuxtLink>
+
+          <button
+            class="block w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="showAdminMenu = false; navigateTo('/hand')"
+          >
+            手势识别
+          </button>
+
+          <button
+            class="block w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="showAdminMenu = false; navigateTo('/admin')"
+          >
+            登录状态
           </button>
         </div>
       </div>
@@ -256,4 +309,3 @@ onUnmounted(() => {
 
 
 </template>
-
