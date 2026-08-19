@@ -15,8 +15,7 @@ const showNavMenu = ref(false)
 const showAdminMenu = ref(false)
 const currentDateTime = ref('')
 
-const TOKEN_KEY = 'admin-token'
-const isLoggedIn = ref(false)
+const { isLoggedIn, checkAuth } = useAuth()
 
 const isOnQAPage = computed(() => route.path.startsWith('/q/'))
 const isOnEditor = computed(() => route.path === '/editor')
@@ -88,6 +87,10 @@ const handleNavExport = () => {
   navStore.dispatch('export')
   showNavMenu.value = false
 }
+const handleNavToggleLocal = () => {
+  navStore.dispatch('toggleLocal')
+  showNavMenu.value = false
+}
 const handleNavClear = () => {
   navStore.dispatch('clear')
   showNavMenu.value = false
@@ -97,21 +100,10 @@ const openSidebar = () => {
   emit('openSidebar')
 }
 
-onMounted(async () => {
+onMounted(() => {
   formatDateTime()
   timer = setInterval(formatDateTime, 60000)
-
-  const token = localStorage.getItem(TOKEN_KEY)
-  if (token) {
-    try {
-      const res = await $fetch<{ valid: boolean }>('/api/auth/verify', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      if (res.valid) {
-        isLoggedIn.value = true
-      }
-    } catch {}
-  }
+  checkAuth()
 })
 
 onUnmounted(() => {
@@ -240,8 +232,8 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <!-- Nav 菜单（仅书签管理页显示） -->
-      <div v-if="isOnNav" class="relative hidden md:block" @mouseenter="showNavMenu = true" @mouseleave="hideNavMenu">
+      <!-- Nav 菜单（仅书签管理页且已登录时显示） -->
+      <div v-if="isOnNav && isLoggedIn" class="relative hidden md:block" @mouseenter="showNavMenu = true" @mouseleave="hideNavMenu">
         <button
           class="text-sm font-medium hover:bg-white/20 px-2 py-1 rounded transition-colors cursor-default"
           @click="showNavMenu = !showNavMenu"
@@ -275,6 +267,13 @@ onUnmounted(() => {
           </button>
 
           <div class="border-t border-gray-200 dark:border-[#2b2d30] my-1"></div>
+
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="handleNavToggleLocal"
+          >
+            {{ navStore.localDataEnabled ? '✓ 本地数据' : '本地数据' }}
+          </button>
 
           <button
             class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors border-none cursor-pointer"

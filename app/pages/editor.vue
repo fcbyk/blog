@@ -6,28 +6,13 @@ import MenuSettings from '~/components/editor/MenuSettings.vue'
 import JsonPreview from '~/components/editor/JsonPreview.vue'
 import { DEFAULT_CONFIG } from '~~/shared/defaultConfig'
 
-const TOKEN_KEY = 'admin-token'
-
-const isChecking = ref(true)
-const isLoggedIn = ref(false)
+const { isLoggedIn, isChecking, checkAuth } = useAuth()
 
 onMounted(async () => {
-  const token = localStorage.getItem(TOKEN_KEY)
-  if (token) {
-    try {
-      const res = await $fetch<{ valid: boolean }>('/api/auth/verify', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      if (res.valid) {
-        isLoggedIn.value = true
-        isChecking.value = false
-        return
-      }
-    } catch {}
-    localStorage.removeItem(TOKEN_KEY)
+  await checkAuth()
+  if (!isLoggedIn.value) {
+    navigateTo('/')
   }
-  isChecking.value = false
-  navigateTo('/')
 })
 
 const editorStore = useEditorStore()

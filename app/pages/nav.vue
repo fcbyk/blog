@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { api } from '~~/app/composables/useApi'
 
 /* ================================================================
  *  类型
@@ -19,26 +20,12 @@ interface BookmarkItem {
   createdAt: number
 }
 
-interface Preview {
-  url: string
-  title: string
-  icon: string
-  source: string
-}
-
-interface MetaResult {
-  title: string
-  icon: string
-  source: string
-}
-
 /* ================================================================
  *  常量
  * ================================================================ */
 
-const STORAGE_KEY = 'bookmarks_v2'
-const OLD_KEY = 'bookmarks_v1'
-const SEED_KEY = STORAGE_KEY + '_seeded'
+const SESSION_KEY = 'bookmarks_v2'
+const LOCAL_KEY = 'bookmarks_local'
 
 /* ================================================================
  *  状态
@@ -49,6 +36,8 @@ const currentFolderId = ref<string | null>(null)
 const searchQuery = ref('')
 const toastMsg = ref('')
 const toastType = ref('')
+const loading = ref(true)
+const loadError = ref(false)
 
 /* Modal */
 const modalOpen = ref(false)
@@ -102,61 +91,140 @@ function showToast(msg: string, type: '' | 'error' | 'success' = '') {
 }
 
 /* ================================================================
- *  存储
+ *  存储（sessionStorage 会话存储 / localStorage 本地持久化）
  * ================================================================ */
 
-function load() {
-  let raw: string | null = null
-  try { raw = localStorage.getItem(STORAGE_KEY) } catch {}
-  let data: any = []
-  if (raw) {
-    try { data = JSON.parse(raw) || [] } catch {}
+function loadFromSession(): BookmarkItem[] | null {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY)
+    if (!raw) return null
+    const data = JSON.parse(raw)
     if (Array.isArray(data) && data.every((it: any) => it && typeof it === 'object' && 'type' in it)) {
-      items.value = data
-    } else {
-      items.value = []
+      return data
     }
-  }
-
-  // 迁移老格式
-  if (items.value.length === 0) {
-    let oldRaw: string | null = null
-    try { oldRaw = localStorage.getItem(OLD_KEY) } catch {}
-    if (oldRaw) {
-      try {
-        const old = JSON.parse(oldRaw)
-        if (Array.isArray(old) && old.length > 0) {
-          items.value = old
-            .filter((b: any) => b && b.url)
-            .map((b: any) => ({
-              id: b.id || uid(),
-              type: 'bookmark',
-              name: b.name || '',
-              url: b.url,
-              icon: b.icon || '',
-              parentId: null,
-              createdAt: b.createdAt || Date.now()
-            }))
-          save()
-          try { localStorage.removeItem(OLD_KEY) } catch {}
-        }
-      } catch {}
-    }
-  }
-
-  // 自愈：缺失字段
-  items.value.forEach(it => {
-    if (!it.id) it.id = uid()
-    if (!it.type) it.type = 'bookmark'
-    if (typeof it.parentId === 'undefined') it.parentId = null
-  })
+  } catch {}
+  return null
 }
 
-function save() {
+function saveToSession() {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items.value))
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(items.value))
   } catch {
     showToast('存储失败：可能超出容量上限', 'error')
+  }
+}
+
+function loadFromLocal(): BookmarkItem[] | null {
+  try {
+    const raw = localStorage.getItem(LOCAL_KEY)
+    if (!raw) return null
+    const data = JSON.parse(raw)
+    if (Array.isArray(data) && data.every((it: any) => it && typeof it === 'object' && 'type' in it)) {
+      return data
+    }
+  } catch {}
+  return null
+}
+
+function saveToLocal() {
+  try {
+    localStorage.setItem(LOCAL_KEY, JSON.stringify(items.value))
+  } catch {
+    showToast('本地存储失败：可能超出容量上限', 'error')
+  }
+}
+
+function clearLocal() {
+  try {
+    localStorage.removeItem(LOCAL_KEY)
+  } catch {}
+}
+
+function persistData() {
+  saveToSession()
+  if (navStore.localDataEnabled) {
+    saveToLocal()
+  }
+}
+
+function parseBookmarksHTML(html: string): BookmarkItem[] {
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(html, 'text/html')
+  const result: BookmarkItem[] = []
+
+  function walk(dl: HTMLDListElement, parentId: string | null) {
+    for (const node of Array.from(dl.children)) {
+      if (node.tagName !== 'DT') continue
+      const a = node.querySelector(':scope > a[href]') as HTMLAnchorElement | null
+      const h3 = node.querySelector(':scope > h3') as HTMLHeadingElement | null
+      if (a) {
+        const href = a.getAttribute('href')
+        if (href && !/^(place:|javascript:|about:|data:|mailto:)/i.test(href)) {
+          const norm = normalizeUrl(href)
+          if (norm) {
+            const name = (a.textContent || '').trim() || getDomain(norm)
+            const icon = extractImportIcon(a, norm)
+            result.push({
+              id: uid(),
+              type: 'bookmark',
+              url: norm,
+              name,
+              icon,
+              parentId,
+              createdAt: Date.now()
+            })
+          }
+        }
+      } else if (h3) {
+        const name = (h3.textContent || '').trim() || '(未命名)'
+        const newId = uid()
+        result.push({
+          id: newId, type: 'folder', name, parentId, createdAt: Date.now()
+        })
+        const innerDL = node.querySelector(':scope > dl') as HTMLDListElement | null
+        if (innerDL) walk(innerDL, newId)
+      }
+    }
+  }
+
+  const rootDL = doc.querySelector('dl') as HTMLDListElement | null
+  if (rootDL) walk(rootDL, null)
+  return result
+}
+
+async function fetchBookmarks() {
+  loading.value = true
+  loadError.value = false
+
+  // 优先级：本地存储 → 会话存储 → 后端请求
+  if (navStore.localDataEnabled) {
+    const local = loadFromLocal()
+    if (local && local.length > 0) {
+      items.value = local
+      saveToSession()
+      loading.value = false
+      return
+    }
+  }
+
+  const sessionCached = loadFromSession()
+  if (sessionCached && sessionCached.length > 0) {
+    items.value = sessionCached
+    loading.value = false
+    return
+  }
+
+  try {
+    const html = await api<string>('/api/proxy/raw', { query: { url: '/bookmarks.html' } })
+    const parsed = parseBookmarksHTML(html)
+    items.value = parsed
+    persistData()
+  } catch (err: any) {
+    console.error('获取书签失败:', err)
+    loadError.value = true
+    showToast('获取书签失败：' + (err?.message || '网络错误'), 'error')
+  } finally {
+    loading.value = false
   }
 }
 
@@ -245,7 +313,7 @@ function addBookmark(opts: { url: string; name: string; icon?: string; parentId?
     parentId: opts.parentId === undefined ? currentFolderId.value : opts.parentId,
     createdAt: Date.now()
   })
-  save()
+  persistData()
   showToast('已添加：' + (opts.name || getDomain(opts.url)), 'success')
 }
 
@@ -258,7 +326,7 @@ function addFolder(opts: { name: string; parentId?: string | null }) {
     parentId: opts.parentId === undefined ? currentFolderId.value : opts.parentId,
     createdAt: Date.now()
   })
-  save()
+  persistData()
   showToast('已创建目录：' + opts.name, 'success')
 }
 
@@ -266,7 +334,7 @@ function updateItem(id: string, patch: Partial<BookmarkItem>) {
   const it = getItem(id)
   if (!it) return
   Object.assign(it, patch)
-  save()
+  persistData()
 }
 
 function deleteItem(id: string) {
@@ -287,7 +355,7 @@ function deleteItem(id: string) {
     if (!confirm(`确认删除书签 "${it.name}"？`)) return
     items.value = items.value.filter(x => x.id !== id)
   }
-  save()
+  persistData()
   showToast('已删除')
 }
 
@@ -498,7 +566,7 @@ async function handleImportFile(e: Event) {
     const rootDL = doc.querySelector('dl') as HTMLDListElement | null
     if (rootDL) walk(rootDL, null)
 
-    save()
+    persistData()
     showToast(`导入完成：${added.folders} 个目录 / ${added.bookmarks} 个书签（跳过 ${added.skipped}）`, 'success')
   } catch (err: any) {
     showToast('导入失败：' + (err?.message || ''), 'error')
@@ -567,7 +635,7 @@ function clearAll() {
   if (!confirm(`确认清空全部 ${items.value.length} 项？此操作不可撤销！`)) return
   items.value = []
   currentFolderId.value = null
-  save()
+  persistData()
   showToast('已清空')
 }
 
@@ -582,6 +650,22 @@ function onNavCmd(e: Event) {
     case 'import': triggerImport(); break
     case 'export': exportBookmarks(); break
     case 'clear':  clearAll(); break
+    case 'toggleLocal': handleToggleLocal(); break
+  }
+}
+
+function handleToggleLocal() {
+  if (navStore.localDataEnabled) {
+    // 关闭本地数据：弹窗确认后清空
+    if (!confirm('关闭本地数据将清空本地存储的书签，确认继续？')) return
+    navStore.setLocalDataEnabled(false)
+    clearLocal()
+    showToast('已关闭本地数据')
+  } else {
+    // 开启本地数据：保存当前数据到本地
+    navStore.setLocalDataEnabled(true)
+    saveToLocal()
+    showToast('已开启本地数据，书签将持久保存', 'success')
   }
 }
 
@@ -590,38 +674,15 @@ function onNavCmd(e: Event) {
  * ================================================================ */
 
 onMounted(() => {
-  load()
-  window.addEventListener('nav-cmd', onNavCmd as EventListener)
-
-  // Seed demo (only first run)
-  if (items.value.length === 0 && !localStorage.getItem(SEED_KEY)) {
-    localStorage.setItem(SEED_KEY, '1')
-    const dev = uid()
-    const design = uid()
-    const web = uid()
-    const demos: BookmarkItem[] = [
-      { id: dev, type: 'folder', name: '开发', parentId: null, createdAt: Date.now() },
-      { id: web, type: 'folder', name: '前端', parentId: dev, createdAt: Date.now() },
-      { id: design, type: 'folder', name: '设计', parentId: null, createdAt: Date.now() },
-    ]
-    const bmDemos = [
-      { url: 'https://github.com', name: 'GitHub', parentId: web },
-      { url: 'https://developer.mozilla.org', name: 'MDN Web Docs', parentId: web },
-      { url: 'https://stackoverflow.com', name: 'Stack Overflow', parentId: web },
-      { url: 'https://obsidian.md', name: 'Obsidian', parentId: design },
-      { url: 'https://chat.deepseek.com/', name: 'DeepSeek', parentId: dev },
-    ]
-    for (const d of demos) items.value.unshift(d)
-    for (const b of bmDemos) {
-      items.value.unshift({
-        id: uid(), type: 'bookmark',
-        url: b.url, name: b.name,
-        icon: getDefaultIcon(b.url), parentId: b.parentId,
-        createdAt: Date.now()
-      })
+  // 恢复本地数据开关状态
+  try {
+    const local = localStorage.getItem(LOCAL_KEY)
+    if (local) {
+      navStore.setLocalDataEnabled(true)
     }
-    save()
-  }
+  } catch {}
+  fetchBookmarks()
+  window.addEventListener('nav-cmd', onNavCmd as EventListener)
 })
 
 onUnmounted(() => {
@@ -711,8 +772,21 @@ onUnmounted(() => {
           <!-- 列表区（可滚动） -->
           <div class="container">
             <div class="list">
+              <!-- Loading -->
+              <div v-if="loading" class="empty">
+                <div class="loading-spinner"></div>
+                <div>加载书签中...</div>
+              </div>
+
+              <!-- Error -->
+              <div v-else-if="loadError" class="empty">
+                <div class="empty-icon">⚠️</div>
+                <div>获取书签失败</div>
+                <div class="hint">请检查网络后刷新重试</div>
+              </div>
+
               <!-- Empty -->
-              <template v-if="isEmpty">
+              <template v-else-if="isEmpty">
                 <div v-if="searchQuery.trim()" class="empty">
                   <div>没有匹配 "{{ searchQuery }}" 的内容</div>
                 </div>
@@ -1267,12 +1341,35 @@ onUnmounted(() => {
   font-size: 12px;
   opacity: 0.7;
 }
+.empty .empty-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6b7280;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 12px;
+}
+.dark .loading-spinner {
+  border-color: #30363d;
+  border-top-color: #8b949e;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 /* Toast */
 .toast-visible {
   position: fixed;
   bottom: 24px;
   left: 50%;
+  transform: translateX(-50%);
   background: #ffffff;
   border: 1px solid #d4cfc4;
   color: #1f2937;
@@ -1280,7 +1377,7 @@ onUnmounted(() => {
   border-radius: 8px;
   font-size: 13px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  z-index: 100;
+  z-index: 300;
 }
 .toast-visible.error {
   border-color: #d93d3d;

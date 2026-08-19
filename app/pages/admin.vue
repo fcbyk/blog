@@ -1,8 +1,6 @@
 <script setup lang="ts">
-const TOKEN_KEY = 'admin-token'
+const { isLoggedIn, isChecking, checkAuth, login: doLogin, logout: doLogout } = useAuth()
 
-const isChecking = ref(true)
-const isLoggedIn = ref(false)
 const password = ref('')
 const error = ref(false)
 const errorMessage = ref('')
@@ -18,24 +16,12 @@ watch(password, () => {
 })
 
 onMounted(async () => {
-  const token = localStorage.getItem(TOKEN_KEY)
-  if (token) {
-    try {
-      const res = await $fetch<{ valid: boolean }>('/api/auth/verify', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      if (res.valid) {
-        isLoggedIn.value = true
-        isChecking.value = false
-        return
-      }
-    } catch {}
-    localStorage.removeItem(TOKEN_KEY)
+  await checkAuth()
+  if (!isLoggedIn.value) {
+    nextTick(() => {
+      passwordInputRef.value?.focus()
+    })
   }
-  isChecking.value = false
-  nextTick(() => {
-    passwordInputRef.value?.focus()
-  })
 })
 
 async function handleLogin() {
@@ -57,8 +43,7 @@ async function handleLogin() {
     })
 
     if (response.success && response.token) {
-      localStorage.setItem(TOKEN_KEY, response.token)
-      isLoggedIn.value = true
+      doLogin(response.token)
       password.value = ''
     } else {
       error.value = true
@@ -79,8 +64,7 @@ async function handleLogin() {
 }
 
 function handleLogout() {
-  localStorage.removeItem(TOKEN_KEY)
-  isLoggedIn.value = false
+  doLogout()
   nextTick(() => {
     passwordInputRef.value?.focus()
   })
