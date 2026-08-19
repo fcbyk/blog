@@ -77,7 +77,7 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
     optimizeDeps: {
-      include: ["dompurify"]
+      include: ["dompurify", "jszip"]
     }
   }
 })
