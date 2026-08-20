@@ -1,13 +1,24 @@
 export const useNavStore = defineStore('nav', () => {
-  const editMode = ref(false)
+  const EDIT_MODE_KEY = 'nav_edit_mode'
+
+  function loadEditMode(): boolean {
+    try {
+      if (typeof window === 'undefined') return false
+      return localStorage.getItem(EDIT_MODE_KEY) === '1'
+    } catch { return false }
+  }
+
+  const editMode = ref(loadEditMode())
   const localDataEnabled = ref(false)
 
   function toggleEdit() {
     editMode.value = !editMode.value
+    try { localStorage.setItem(EDIT_MODE_KEY, editMode.value ? '1' : '0') } catch {}
   }
 
   function setEditMode(on: boolean) {
     editMode.value = !!on
+    try { localStorage.setItem(EDIT_MODE_KEY, on ? '1' : '0') } catch {}
   }
 
   function toggleLocalData() {

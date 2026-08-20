@@ -25,13 +25,6 @@ export interface FolderOption {
   depth: number
 }
 
-interface Preview {
-  url: string
-  title: string
-  icon: string
-  source: string
-}
-
 /* ================================================================
  *  Props / Emits
  * ================================================================ */
@@ -76,29 +69,14 @@ const formIcon = ref('')
 const formFolderName = ref('')
 const formParentId = ref<string | null>(null)
 
-const currentPreview = ref<Preview | null>(null)
-const previewVisible = ref(false)
-const previewUrl = ref('')
-const previewIcon = ref('')
-const previewName = ref('')
-const previewStatusText = ref('')
-const previewStatusKind = ref<'' | 'ok' | 'fail'>('')
-
-/* 图标加载失败标记：用于回退到默认地球图标（已去除 Google 兜底） */
-const previewFailed = ref(false)
 const editFailed = ref(false)
-watch([previewIcon, formIcon], () => {
-  previewFailed.value = false
-  editFailed.value = false
-})
+watch(formIcon, () => { editFailed.value = false })
+
+const fetchingTitle = ref(false)
 
 const formUrlRef = ref<HTMLInputElement | null>(null)
 const formNameRef = ref<HTMLInputElement | null>(null)
 const formFolderNameRef = ref<HTMLInputElement | null>(null)
-const previewNameRef = ref<HTMLInputElement | null>(null)
-const modalMaskRef = ref<HTMLDivElement | null>(null)
-
-let urlDebounce: ReturnType<typeof setTimeout> | null = null
 
 /* ================================================================
  *  工具函数
@@ -119,7 +97,7 @@ function normalizeUrl(raw: string): string {
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url
   try {
     const u = new URL(url)
-    if (!u.hostname.includes('.')) return ''
+    if (!u.hostname.includes('.') && u.hostname !== 'localhost') return ''
     return u.toString()
   } catch {
     return ''
@@ -128,11 +106,11 @@ function normalizeUrl(raw: string): string {
 
 function titleFromHtml(text: string): string {
   const t = text.match(/<title[^>]*>([\s\S]*?)<\/title>/i)
-  if (t) return decodeHtml(t[1]).trim()
+  if (t && t[1]) return decodeHtml(t[1]).trim()
   const og = text.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i)
-  if (og) return decodeHtml(og[1]).trim()
+  if (og && og[1]) return decodeHtml(og[1]).trim()
   const tw = text.match(/<meta\s+(?:name|property)=["']twitter:title["']\s+content=["']([^"']+)["']/i)
-  if (tw) return decodeHtml(tw[1]).trim()
+  if (tw && tw[1]) return decodeHtml(tw[1]).trim()
   return ''
 }
 
@@ -165,7 +143,8 @@ async function fetchMeta(url: string): Promise<{ title: string; icon: string; so
       const data = await res.json()
       if (data.status === 'success' && data.data) {
         title = data.data.title || ''
-        icon = data.data.logo || data.data.image || ''
+        const rawLogo = data.data.logo || data.data.image || ''
+        icon = typeof rawLogo === 'object' && rawLogo !== null ? (rawLogo as any).url || '' : String(rawLogo || '')
         if (title) source = 'microlink'
       }
     }
@@ -185,7 +164,7 @@ async function fetchMeta(url: string): Promise<{ title: string; icon: string; so
         if (title) source = source || 'direct'
         if (!icon) {
           const im = text.match(/<link[^>]+rel=["'](?:icon|shortcut\s+icon|apple-touch-icon)[^>]*href=["']([^"']+)["']/i)
-          if (im) {
+          if (im && im[1]) {
             try { icon = new URL(im[1], url).toString() } catch {}
           }
         }
@@ -195,56 +174,6 @@ async function fetchMeta(url: string): Promise<{ title: string; icon: string; so
 
   if (!icon) icon = getDefaultIcon(url)
   return { title, icon, source }
-}
-
-async function startPreview(rawUrl: string, force = false) {
-  const url = normalizeUrl(rawUrl)
-  if (!url) {
-    previewVisible.value = false
-    currentPreview.value = null
-    return
-  }
-
-  previewVisible.value = true
-  previewUrl.value = url
-  previewIcon.value = getDefaultIcon(url)
-  previewName.value = ''
-  previewStatusText.value = '⏳ 识别中…'
-  previewStatusKind.value = ''
-
-  if (force) currentPreview.value = null
-  if (currentPreview.value && currentPreview.value.url === url) {
-    applyPreview()
-    return
-  }
-
-  try {
-    const { title, icon, source } = await fetchMeta(url)
-    currentPreview.value = { url, title, icon, source }
-    applyPreview()
-  } catch {
-    currentPreview.value = { url, title: '', icon: getDefaultIcon(url), source: 'error' }
-    applyPreview()
-  }
-}
-
-function applyPreview() {
-  const p = currentPreview.value
-  if (!p) return
-  previewIcon.value = p.icon
-  previewUrl.value = p.url
-  if (p.title) {
-    previewName.value = p.title
-    const tag = p.source === 'microlink' ? 'Microlink'
-              : p.source === 'direct' ? '直连' : ''
-    previewStatusText.value = tag ? `✓ ${tag}` : '✓ 已识别'
-    previewStatusKind.value = 'ok'
-  } else {
-    previewName.value = ''
-    previewStatusText.value = '✗ 未能自动识别，请手动填写'
-    previewStatusKind.value = 'fail'
-    setTimeout(() => previewNameRef.value?.focus(), 80)
-  }
 }
 
 function getItem(id: string | null): BookmarkItem | null {
@@ -269,8 +198,7 @@ function resetForm() {
   formIcon.value = ''
   formFolderName.value = ''
   formParentId.value = props.defaultParentId
-  currentPreview.value = null
-  previewVisible.value = false
+  fetchingTitle.value = false
 
   if (props.purpose === 'edit' && props.editingId) {
     const it = getItem(props.editingId)
@@ -301,7 +229,7 @@ function focusFirstField() {
 }
 
 /* ================================================================
- *  关闭 / Esc / 点遮罩
+ *  关闭 / Esc
  * ================================================================ */
 
 function close() {
@@ -315,16 +243,9 @@ function close() {
 function setMode(newMode: ModalMode) {
   if (newMode === props.mode) return
   emit('update:mode', newMode)
-  // 切换时清空上一个模式的输入
   formUrl.value = ''
   formFolderName.value = ''
-  currentPreview.value = null
-  previewVisible.value = false
   nextTick(() => focusFirstField())
-}
-
-function onModalMaskClick(e: MouseEvent) {
-  if (e.target === modalMaskRef.value) close()
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -336,24 +257,11 @@ onMounted(() => {
 })
 onUnmounted(() => {
   document.removeEventListener('keydown', onKeydown)
-  if (urlDebounce) clearTimeout(urlDebounce)
 })
 
 /* ================================================================
  *  输入处理
  * ================================================================ */
-
-function onUrlInput() {
-  if (urlDebounce) clearTimeout(urlDebounce)
-  const url = normalizeUrl(formUrl.value)
-  if (!url) {
-    previewVisible.value = false
-    currentPreview.value = null
-    return
-  }
-  if (currentPreview.value && currentPreview.value.url === url) return
-  urlDebounce = setTimeout(() => startPreview(url, false), 700)
-}
 
 function onUrlKeydown(e: KeyboardEvent) {
   if (e.key === 'Enter') {
@@ -370,37 +278,27 @@ function onFolderNameKeydown(e: KeyboardEvent) {
 }
 
 function onIconInput() {
-  previewIcon.value = formIcon.value.trim() || getDefaultIcon(formUrl.value.trim())
+  editFailed.value = false
 }
 
-async function onAutoIdentify() {
+async function fetchTitle() {
   const url = normalizeUrl(formUrl.value)
   if (!url) {
     emit('error', '请先输入正确的网址')
     return
   }
-  await startPreview(url, true)
-}
-
-async function onReIdentify() {
-  const norm = normalizeUrl(formUrl.value.trim())
-  if (!norm) {
-    emit('error', '请先填写正确的 URL')
-    return
-  }
+  fetchingTitle.value = true
   try {
-    const { title, icon } = await fetchMeta(norm)
-    if (title) formName.value = title
-    else {
-      formName.value = ''
-      nextTick(() => formNameRef.value?.focus())
-      emit('error', '自动识别失败，请手动填写名称')
+    const { title } = await fetchMeta(url)
+    if (title) {
+      formName.value = title
+    } else {
+      emit('error', '未能获取标题，请手动填写')
     }
-    formUrl.value = norm
-    formIcon.value = icon
-    previewIcon.value = icon
   } catch {
-    emit('error', '识别失败')
+    emit('error', '获取标题失败')
+  } finally {
+    fetchingTitle.value = false
   }
 }
 
@@ -408,46 +306,40 @@ function onIconError(e: Event, _url: string) {
   const img = e.target as HTMLImageElement
   if (img.dataset.fb) return
   img.dataset.fb = '1'
-  // 已去除 Google 兜底：加载失败时切换到默认地球图标
-  if (img.classList.contains('preview-icon')) editFailed.value = true
-  else previewFailed.value = true
+  editFailed.value = true
 }
 
 /* ================================================================
  *  Submit
  * ================================================================ */
 
-async function submit() {
+function submit() {
   if (props.purpose === 'edit') {
     submitEdit()
   } else if (props.mode === 'folder') {
     submitAddFolder()
   } else {
-    await submitAddBookmark()
+    submitAddBookmark()
   }
 }
 
-async function submitAddBookmark() {
-  const raw = formUrl.value
-  const url = normalizeUrl(raw)
+function submitAddBookmark() {
+  const url = normalizeUrl(formUrl.value)
   if (!url) {
     emit('error', '请输入正确的网址（含 http/https）')
     return
   }
-  if (!currentPreview.value || currentPreview.value.url !== url) {
-    await startPreview(url, false)
-  }
-  const name = previewName.value.trim()
+  const name = formName.value.trim()
   if (!name) {
-    previewNameRef.value?.focus()
-    emit('error', '请填写网站名称')
+    formNameRef.value?.focus()
+    emit('error', '请填写名称')
     return
   }
-  let icon = previewIcon.value
-  if (!icon || icon === 'data:') icon = getDefaultIcon(url)
   emit('submit', {
     action: 'addBookmark',
-    url, name, icon,
+    url,
+    name,
+    icon: formIcon.value.trim(),
     parentId: formParentId.value
   })
   close()
@@ -493,7 +385,7 @@ function submitEdit() {
   } else {
     const name = formName.value.trim()
     if (!name) { emit('error', '目录名不能为空'); return }
-    if (props.folderSelectDisabledSet.has(parentId)) {
+    if (parentId && props.folderSelectDisabledSet.has(parentId)) {
       emit('error', '不能移入自己或子目录')
       return
     }
@@ -518,9 +410,7 @@ function onDeleteClick() {
     <Transition name="bm-fade">
       <div
         v-if="modelValue"
-        ref="modalMaskRef"
         class="modal-mask"
-        @click="onModalMaskClick"
       >
         <Transition name="bm-dialog">
           <div v-if="modelValue" class="modal" role="dialog" aria-modal="true">
@@ -563,39 +453,31 @@ function onDeleteClick() {
             <div class="modal-body">
               <!-- 添加书签 -->
               <template v-if="purpose === 'add' && mode === 'bookmark'">
+                <input
+                  ref="formUrlRef"
+                  v-model="formUrl"
+                  type="url"
+                  placeholder="粘贴或输入网址，例如 https://github.com"
+                  spellcheck="false"
+                  @keydown="onUrlKeydown"
+                >
                 <div class="with-button">
                   <input
-                    ref="formUrlRef"
-                    v-model="formUrl"
-                    type="url"
-                    placeholder="粘贴或输入网址，例如 https://github.com"
+                    ref="formNameRef"
+                    v-model="formName"
+                    type="text"
+                    placeholder="名称"
+                    maxlength="200"
                     spellcheck="false"
-                    @input="onUrlInput"
-                    @keydown="onUrlKeydown"
                   >
-                  <button type="button" class="btn-mono" @click="onAutoIdentify">自动识别</button>
+                  <button type="button" class="btn-mono" :disabled="fetchingTitle" @click="fetchTitle">{{ fetchingTitle ? '获取标题中…' : '获取标题' }}</button>
                 </div>
-                <div :class="['preview', previewVisible ? 'visible' : '']">
-                  <img
-                    v-if="previewIcon && !previewFailed"
-                    id="modal-preview-icon"
-                    :src="previewIcon"
-                    alt=""
-                    @error="(e) => onIconError(e, previewUrl)"
-                  >
-                  <IconGlobe v-else class="preview-globe" aria-hidden="true" />
-                  <div class="meta">
-                    <input
-                      ref="previewNameRef"
-                      v-model="previewName"
-                      class="preview-name-input"
-                      placeholder="网站名称（识别失败时手动填写）"
-                      maxlength="200"
-                    >
-                    <div class="url" id="modal-preview-url">{{ previewUrl }}</div>
-                  </div>
-                  <span :class="['status', previewStatusKind]" id="modal-preview-status">{{ previewStatusText }}</span>
-                </div>
+                <input
+                  v-model="formIcon"
+                  type="url"
+                  placeholder="图标地址（可选）"
+                  spellcheck="false"
+                >
               </template>
 
               <!-- 添加目录 -->
@@ -620,18 +502,21 @@ function onDeleteClick() {
                     :src="formIcon"
                     :data-url="formUrl"
                     alt=""
-                    @error="(e) => onIconError(e, formUrl)"
+                    @error="(e: Event) => onIconError(e, formUrl)"
                   >
                   <IconGlobe v-else class="preview-icon preview-globe" aria-hidden="true" />
                 </div>
-                <input
-                  ref="formNameRef"
-                  v-model="formName"
-                  type="text"
-                  placeholder="名称"
-                  maxlength="200"
-                  spellcheck="false"
-                >
+                <div class="with-button">
+                  <input
+                    ref="formNameRef"
+                    v-model="formName"
+                    type="text"
+                    placeholder="名称"
+                    maxlength="200"
+                    spellcheck="false"
+                  >
+                  <button type="button" class="btn-mono" :disabled="fetchingTitle" @click="fetchTitle">{{ fetchingTitle ? '获取标题中…' : '获取标题' }}</button>
+                </div>
                 <input
                   v-model="formUrl"
                   type="url"
@@ -646,9 +531,6 @@ function onDeleteClick() {
                   spellcheck="false"
                   @input="onIconInput"
                 >
-                <div class="with-button">
-                  <button type="button" class="btn-mono" style="flex:1" @click="onReIdentify">↻ 重新识别</button>
-                </div>
                 <div class="parent-select">
                   <label>目录：</label>
                   <select v-model="formParentId">
@@ -863,128 +745,6 @@ function onDeleteClick() {
   flex: 1;
 }
 
-/* Preview */
-.preview {
-  display: none;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: #f5f3ee;
-  border: 1px dashed #d4cfc4;
-  border-radius: 6px;
-  font-size: 13px;
-}
-.preview.visible {
-  display: flex;
-}
-.dark .preview {
-  background: #0d1117;
-  border-color: #30363d;
-}
-.preview img {
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  background: #ffffff;
-  border: 1px solid #d4cfc4;
-  object-fit: contain;
-  flex-shrink: 0;
-}
-.dark .preview img {
-  background: #0d1117;
-  border-color: #30363d;
-}
-.preview-globe {
-  width: 24px;
-  height: 24px;
-  color: #6b7280;
-  flex-shrink: 0;
-}
-.preview-globe.preview-icon {
-  width: 40px;
-  height: 40px;
-  padding: 6px;
-  border-radius: 6px;
-  background: #f5f3ee;
-  border: 1px solid #ebe7dd;
-  box-sizing: border-box;
-}
-.dark .preview-globe {
-  color: #8b949e;
-}
-.dark .preview-globe.preview-icon {
-  background: #0d1117;
-  border-color: #21262d;
-}
-.preview .meta {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  flex: 1;
-  gap: 4px;
-}
-.preview .meta .preview-name-input {
-  background: #ffffff;
-  border: 1px solid #d4cfc4;
-  color: #1f2937;
-  padding: 6px 10px;
-  border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
-  outline: none;
-  width: 100%;
-  font-family: inherit;
-  transition: border-color 0.15s;
-}
-.preview .meta .preview-name-input:focus {
-  border-color: #2563eb;
-}
-.preview .meta .preview-name-input::placeholder {
-  color: #6b7280;
-  font-weight: normal;
-}
-.dark .preview .meta .preview-name-input {
-  background: #0d1117;
-  border-color: #30363d;
-  color: #e6edf3;
-}
-.dark .preview .meta .preview-name-input:focus {
-  border-color: #58a6ff;
-}
-.dark .preview .meta .preview-name-input::placeholder {
-  color: #8b949e;
-}
-.preview .meta .url {
-  color: #6b7280;
-  font-size: 11px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.dark .preview .meta .url {
-  color: #8b949e;
-}
-.preview .status {
-  color: #6b7280;
-  font-size: 12px;
-  white-space: nowrap;
-}
-.preview .status.ok {
-  color: #2da44e;
-}
-.preview .status.fail {
-  color: #d93d3d;
-}
-.dark .preview .status {
-  color: #8b949e;
-}
-.dark .preview .status.ok {
-  color: #3fb950;
-}
-.dark .preview .status.fail {
-  color: #f85149;
-}
-
 .parent-select {
   display: flex;
   align-items: center;
@@ -1029,6 +789,13 @@ function onDeleteClick() {
 .dark .icon-row img {
   background: #0d1117;
   border-color: #21262d;
+}
+
+.preview-globe {
+  color: #6b7280;
+}
+.dark .preview-globe {
+  color: #8b949e;
 }
 
 /* Footer */

@@ -73,7 +73,7 @@ function normalizeUrl(raw: string): string {
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url
   try {
     const u = new URL(url)
-    if (!u.hostname.includes('.')) return ''
+    if (!u.hostname.includes('.') && u.hostname !== 'localhost') return ''
     return u.toString()
   } catch {
     return ''
@@ -304,7 +304,7 @@ const folderOptions = computed(() => buildFolderOptions())
 
 function addBookmark(opts: { url: string; name: string; icon?: string; parentId?: string | null }) {
   if (!opts.url) return
-  items.value.unshift({
+  items.value.push({
     id: uid(),
     type: 'bookmark',
     url: opts.url,
@@ -319,7 +319,7 @@ function addBookmark(opts: { url: string; name: string; icon?: string; parentId?
 
 function addFolder(opts: { name: string; parentId?: string | null }) {
   if (!opts.name) return
-  items.value.unshift({
+  items.value.push({
     id: uid(),
     type: 'folder',
     name: opts.name,
@@ -458,9 +458,14 @@ function onModalDelete(id: string) {
  * ================================================================ */
 
 const failedIconIds = ref<Set<string>>(new Set())
+const loadedIconIds = ref<Set<string>>(new Set())
 
 function onIconError(itemId: string) {
   failedIconIds.value.add(itemId)
+}
+
+function onIconLoad(itemId: string) {
+  loadedIconIds.value.add(itemId)
 }
 
 const navStore = useNavStore()
@@ -538,7 +543,7 @@ async function handleImportFile(e: Event) {
               } else {
                 const name = (a.textContent || '').trim() || getDomain(norm)
                 const icon = extractImportIcon(a, norm)
-                items.value.unshift({
+                items.value.push({
                   id: uid(),
                   type: 'bookmark',
                   url: norm,
@@ -554,7 +559,7 @@ async function handleImportFile(e: Event) {
         } else if (h3) {
           const name = (h3.textContent || '').trim() || '(未命名)'
           const newId = uid()
-          items.value.unshift({
+          items.value.push({
             id: newId, type: 'folder', name, parentId, createdAt: Date.now()
           })
           added.folders++
@@ -838,15 +843,19 @@ onUnmounted(() => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <img
-                    v-if="b.icon && !failedIconIds.has(b.id)"
-                    class="icon"
-                    :src="b.icon"
-                    :data-url="b.url"
-                    alt=""
-                    @error="onIconError(b.id)"
-                  >
-                  <IconGlobe v-else class="icon-svg" aria-hidden="true" />
+                  <div class="icon-wrap">
+                    <img
+                      v-if="b.icon && !failedIconIds.has(b.id)"
+                      class="icon"
+                      :class="{ 'icon-loaded': loadedIconIds.has(b.id) }"
+                      :src="b.icon"
+                      :data-url="b.url"
+                      alt=""
+                      @load="onIconLoad(b.id)"
+                      @error="onIconError(b.id)"
+                    >
+                    <IconGlobe v-if="!b.icon || failedIconIds.has(b.id) || !loadedIconIds.has(b.id)" class="icon-svg" aria-hidden="true" />
+                  </div>
                   <div class="name" :title="b.name">{{ b.name }}</div>
                   <div class="url" :title="b.url">{{ getDomain(b.url || '') }}</div>
                 </a>
@@ -870,12 +879,14 @@ onUnmounted(() => {
         </div>
 
         <!-- Toast -->
+      <Teleport to="body">
         <Transition name="toast-anim">
           <div
             v-if="toastMsg"
             :class="['toast-visible', toastType]"
           >{{ toastMsg }}</div>
         </Transition>
+      </Teleport>
 
         <!-- Hidden file input -->
         <input
@@ -1150,11 +1161,25 @@ onUnmounted(() => {
   flex: 1;
   width: 100%;
 }
+.icon-wrap {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+.icon-wrap > * {
+  grid-area: 1 / 1;
+}
 .icon {
   width: 40px;
   height: 40px;
   object-fit: contain;
   display: block;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.icon-loaded {
+  opacity: 1;
 }
 .icon-svg {
   width: 40px;
@@ -1377,7 +1402,7 @@ onUnmounted(() => {
   border-radius: 8px;
   font-size: 13px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  z-index: 300;
+  z-index: 9999;
 }
 .toast-visible.error {
   border-color: #d93d3d;
