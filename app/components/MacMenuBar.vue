@@ -12,6 +12,7 @@ const navStore = useNavStore()
 const showMenu = ref(false)
 const showDataMenu = ref(false)
 const showNavMenu = ref(false)
+const showNavSourceMenu = ref(false)
 const showAdminMenu = ref(false)
 const currentDateTime = ref('')
 
@@ -75,6 +76,10 @@ const hideNavMenu = () => {
   showNavMenu.value = false
 }
 
+const hideNavSourceMenu = () => {
+  showNavSourceMenu.value = false
+}
+
 const handleNavEdit = () => {
   navStore.toggleEdit()
   showNavMenu.value = false
@@ -94,6 +99,10 @@ const handleNavToggleLocal = () => {
 const handleNavClear = () => {
   navStore.dispatch('clear')
   showNavMenu.value = false
+}
+const handleNavSourceMode = (on: boolean) => {
+  navStore.setSourceMode(on)
+  showNavSourceMenu.value = false
 }
 
 const openSidebar = () => {
@@ -280,6 +289,34 @@ onUnmounted(() => {
             @click="handleNavClear"
           >
             清空书签
+          </button>
+        </div>
+      </div>
+
+      <div v-if="isOnNav && isLoggedIn" class="relative hidden md:block" @mouseenter="showNavSourceMenu = true" @mouseleave="hideNavSourceMenu">
+        <button
+          class="text-sm font-medium hover:bg-white/20 px-2 py-1 rounded transition-colors cursor-default"
+          @click="showNavSourceMenu = !showNavSourceMenu"
+        >
+          源码
+        </button>
+
+        <div
+          v-show="showNavSourceMenu"
+          class="absolute top-full left-0 w-36 bg-white/90 dark:bg-[#1a1c1e]/95 backdrop-blur-xl rounded-lg py-1 overflow-hidden border border-gray-200 dark:border-[#2b2d30] shadow-sm"
+        >
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="handleNavSourceMode(true)"
+          >
+            {{ navStore.sourceMode ? '✓ 源码模式' : '源码模式' }}
+          </button>
+
+          <button
+            class="flex items-center w-full text-left px-4 py-2 text-sm bg-transparent hover:bg-gray-100 dark:hover:bg-[#2f3237] hover:text-indigo-600 dark:hover:text-[#ebedf0] transition-colors border-none cursor-pointer"
+            @click="handleNavSourceMode(false)"
+          >
+            {{ !navStore.sourceMode ? '✓ 非源码模式' : '非源码模式' }}
           </button>
         </div>
       </div>

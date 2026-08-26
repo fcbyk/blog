@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { isLoggedIn, isChecking, checkAuth, login: doLogin, logout: doLogout } = useAuth()
+const navStore = useNavStore()
 
 const password = ref('')
 const error = ref(false)
@@ -65,6 +66,7 @@ async function handleLogin() {
 
 function handleLogout() {
   doLogout()
+  navStore.resetModes()
   nextTick(() => {
     passwordInputRef.value?.focus()
   })

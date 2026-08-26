@@ -585,6 +585,20 @@ function exportBookmarks() {
     showToast('没有可导出的内容', 'error')
     return
   }
+  const html = buildBookmarksHtml()
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  const ts = new Date().toISOString().slice(0, 10)
+  a.download = `bookmarks-${ts}.html`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  showToast('已导出', 'success')
+}
+
+function buildBookmarksHtml() {
   const escapeAttr = (s: string) => String(s).replace(/[<&"]/g, c =>
     ({ '<': '&lt;', '&': '&amp;', '"': '&quot;' }[c]!))
 
@@ -620,16 +634,38 @@ function exportBookmarks() {
 <DL><p>
 ${body}</DL><p>
 `
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-  const a = document.createElement('a')
-  a.href = URL.createObjectURL(blob)
-  const ts = new Date().toISOString().slice(0, 10)
-  a.download = `bookmarks-${ts}.html`
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000)
-  showToast('已导出', 'success')
+  return html
+}
+
+const bookmarksSource = computed(() => buildBookmarksHtml())
+const sourceLineNumbers = computed(() =>
+  Array.from({ length: bookmarksSource.value.split('\n').length }, (_, i) => i + 1).join('\n')
+)
+
+async function copySource() {
+  if (items.value.length === 0) {
+    showToast('没有可复制的源码', 'error')
+    return
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(bookmarksSource.value)
+    } else {
+      const textarea = document.createElement('textarea')
+      textarea.value = bookmarksSource.value
+      textarea.setAttribute('readonly', 'true')
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
+    showToast('源码已复制', 'success')
+  } catch {
+    showToast('复制失败，请重试', 'error')
+  }
 }
 
 function clearAll() {
@@ -714,7 +750,7 @@ onUnmounted(() => {
             />
           </div>
           <!-- 左对齐：面包屑（紧贴三个点的右边） -->
-          <div class="flex items-center text-[12px] text-[#555] dark:text-[#aaa] truncate min-w-0 pl-[68px]">
+          <div class="flex items-center text-[12px] text-[#555] dark:text-[#aaa] truncate min-w-0 pl-17">
             <button
               type="button"
               class="px-1.5 py-0.5 rounded cursor-default transition-colors hover:bg-black/5 dark:hover:bg-white/10 shrink-0"
@@ -730,8 +766,11 @@ onUnmounted(() => {
               >{{ f.name }}</button>
             </template>
           </div>
+          <div v-if="navStore.sourceMode" class="ml-auto flex items-center shrink-0">
+            <button type="button" class="source-copy-btn desktop-copy-btn" @click="copySource">复制</button>
+          </div>
           <!-- 右对齐：搜索框（带图标） -->
-          <div class="ml-auto flex items-center shrink-0 w-64 max-w-[40%]">
+          <div v-else class="ml-auto flex items-center shrink-0 w-64 max-w-[40%]">
             <div class="relative w-full">
               <svg
                 class="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-gray-400 dark:text-gray-500 pointer-events-none"
@@ -753,129 +792,152 @@ onUnmounted(() => {
         </div>
 
         <!-- 内容区（仅移动端：让位给顶部 MacMenuBar 的 40px + 显示面包屑） -->
-        <div class="nav-content flex-1 overflow-y-auto overflow-x-hidden pb-6">
-          <div class="sticky-bar md:hidden">
-            <div class="container">
-              <nav class="breadcrumb block md:hidden">
-                <button
-                  type="button"
-                  :class="['crumb', currentFolderId === null ? 'root current' : 'root']"
-                  @click="gotoRoot"
-                >🏠 所有书签</button>
-                <template v-for="f in breadcrumbPath" :key="f.id">
-                  <span class="sep">/</span>
+        <div
+          class="nav-content flex-1 overflow-y-auto"
+          :class="navStore.sourceMode ? 'overflow-x-auto' : 'overflow-x-hidden pb-6'"
+        >
+          <template v-if="navStore.sourceMode">
+            <div v-if="loading" class="empty source-empty">
+              <div class="loading-spinner"></div>
+              <div>加载书签中...</div>
+            </div>
+
+            <div v-else-if="loadError" class="empty source-empty">
+              <div class="empty-icon">⚠️</div>
+              <div>获取书签失败</div>
+              <div class="hint">请检查网络后刷新重试</div>
+            </div>
+
+            <div v-else class="source-code-wrap">
+              <pre class="source-lines" aria-hidden="true">{{ sourceLineNumbers }}</pre>
+              <pre class="source-code"><code>{{ bookmarksSource }}</code></pre>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="sticky-bar md:hidden">
+              <div class="container">
+                <nav class="breadcrumb block md:hidden">
                   <button
                     type="button"
-                    :class="['crumb', f.id === currentFolderId ? 'current' : '']"
-                    @click="gotoFolder(f.id)"
-                  >{{ f.name }}</button>
-                </template>
-              </nav>
+                    :class="['crumb', currentFolderId === null ? 'root current' : 'root']"
+                    @click="gotoRoot"
+                  >🏠 所有书签</button>
+                  <template v-for="f in breadcrumbPath" :key="f.id">
+                    <span class="sep">/</span>
+                    <button
+                      type="button"
+                      :class="['crumb', f.id === currentFolderId ? 'current' : '']"
+                      @click="gotoFolder(f.id)"
+                    >{{ f.name }}</button>
+                  </template>
+                </nav>
+              </div>
             </div>
-          </div>
 
-          <!-- 列表区（可滚动） -->
-          <div class="container">
-            <div class="list">
-              <!-- Loading -->
-              <div v-if="loading" class="empty">
-                <div class="loading-spinner"></div>
-                <div>加载书签中...</div>
-              </div>
+            <!-- 列表区（可滚动） -->
+            <div class="container">
+              <div class="list">
+                <!-- Loading -->
+                <div v-if="loading" class="empty">
+                  <div class="loading-spinner"></div>
+                  <div>加载书签中...</div>
+                </div>
 
-              <!-- Error -->
-              <div v-else-if="loadError" class="empty">
-                <div class="empty-icon">⚠️</div>
-                <div>获取书签失败</div>
-                <div class="hint">请检查网络后刷新重试</div>
-              </div>
+                <!-- Error -->
+                <div v-else-if="loadError" class="empty">
+                  <div class="empty-icon">⚠️</div>
+                  <div>获取书签失败</div>
+                  <div class="hint">请检查网络后刷新重试</div>
+                </div>
 
-              <!-- Empty -->
-              <template v-else-if="isEmpty">
-                <div v-if="searchQuery.trim()" class="empty">
-                  <div>没有匹配 "{{ searchQuery }}" 的内容</div>
-                </div>
-                <div v-else-if="currentFolderId && !navStore.editMode" class="empty">
-                  <IconFolder class="empty-folder-svg" />
-                  <div>这个目录是空的</div>
-                  <div class="hint">在上方输入网址添加，或新建子目录</div>
-                </div>
-                <div v-else-if="!navStore.editMode" class="empty">还没有书签</div>
-              </template>
-
-              <!-- Folder cards -->
-              <div
-                v-for="f in filteredFolders"
-                :key="f.id"
-                class="card folder"
-                @click="enterFolder(f.id)"
-              >
-                <div v-if="navStore.editMode" class="actions">
-                  <button
-                    class="btn-icon"
-                    title="重命名"
-                    @click.stop="openEditModal(f.id)"
-                  >✏️</button>
-                </div>
-                <div class="folder-body">
-                  <div class="folder-icon"><IconFolder class="folder-svg" /></div>
-                  <div class="folder-name" :title="f.name">{{ f.name }}</div>
-                  <div class="folder-meta">{{ countInFolder(f.id) }} 项</div>
-                </div>
-              </div>
-
-              <!-- Bookmark cards -->
-              <div
-                v-for="b in filteredBookmarks"
-                :key="b.id"
-                class="card bookmark"
-              >
-                <div v-if="navStore.editMode" class="actions">
-                  <button
-                    class="btn-icon"
-                    title="编辑名称、移动目录、更换图标"
-                    @click.stop.prevent="openEditModal(b.id)"
-                  >✏️</button>
-                </div>
-                <a
-                  class="card-link"
-                  :href="b.url"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <div class="icon-wrap">
-                    <img
-                      v-if="b.icon && !failedIconIds.has(b.id)"
-                      class="icon"
-                      :class="{ 'icon-loaded': loadedIconIds.has(b.id) }"
-                      :src="b.icon"
-                      :data-url="b.url"
-                      alt=""
-                      @load="onIconLoad(b.id)"
-                      @error="onIconError(b.id)"
-                    >
-                    <IconGlobe v-if="!b.icon || failedIconIds.has(b.id) || !loadedIconIds.has(b.id)" class="icon-svg" aria-hidden="true" />
+                <!-- Empty -->
+                <template v-else-if="isEmpty">
+                  <div v-if="searchQuery.trim()" class="empty">
+                    <div>没有匹配 "{{ searchQuery }}" 的内容</div>
                   </div>
-                  <div class="name" :title="b.name">{{ b.name }}</div>
-                  <div class="url" :title="b.url">{{ getDomain(b.url || '') }}</div>
-                </a>
-              </div>
+                  <div v-else-if="currentFolderId && !navStore.editMode" class="empty">
+                    <IconFolder class="empty-folder-svg" />
+                    <div>这个目录是空的</div>
+                    <div class="hint">在上方输入网址添加，或新建子目录</div>
+                  </div>
+                  <div v-else-if="!navStore.editMode" class="empty">还没有书签</div>
+                </template>
 
-              <!-- Add placeholder card -->
-              <div
-                v-if="navStore.editMode && !searchQuery.trim()"
-                class="card add-card"
-                role="button"
-                aria-label="添加书签到当前目录"
-                @click="openAddModal"
-              >
-                <div class="add-body">
-                  <div class="add-icon">+</div>
-                  <div class="add-text">添加到这里</div>
+                <!-- Folder cards -->
+                <div
+                  v-for="f in filteredFolders"
+                  :key="f.id"
+                  class="card folder"
+                  @click="enterFolder(f.id)"
+                >
+                  <div v-if="navStore.editMode" class="actions">
+                    <button
+                      class="btn-icon"
+                      title="重命名"
+                      @click.stop="openEditModal(f.id)"
+                    >✏️</button>
+                  </div>
+                  <div class="folder-body">
+                    <div class="folder-icon"><IconFolder class="folder-svg" /></div>
+                    <div class="folder-name" :title="f.name">{{ f.name }}</div>
+                    <div class="folder-meta">{{ countInFolder(f.id) }} 项</div>
+                  </div>
+                </div>
+
+                <!-- Bookmark cards -->
+                <div
+                  v-for="b in filteredBookmarks"
+                  :key="b.id"
+                  class="card bookmark"
+                >
+                  <div v-if="navStore.editMode" class="actions">
+                    <button
+                      class="btn-icon"
+                      title="编辑名称、移动目录、更换图标"
+                      @click.stop.prevent="openEditModal(b.id)"
+                    >✏️</button>
+                  </div>
+                  <a
+                    class="card-link"
+                    :href="b.url"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <div class="icon-wrap">
+                      <img
+                        v-if="b.icon && !failedIconIds.has(b.id)"
+                        class="icon"
+                        :class="{ 'icon-loaded': loadedIconIds.has(b.id) }"
+                        :src="b.icon"
+                        :data-url="b.url"
+                        alt=""
+                        @load="onIconLoad(b.id)"
+                        @error="onIconError(b.id)"
+                      >
+                      <IconGlobe v-if="!b.icon || failedIconIds.has(b.id) || !loadedIconIds.has(b.id)" class="icon-svg" aria-hidden="true" />
+                    </div>
+                    <div class="name" :title="b.name">{{ b.name }}</div>
+                    <div class="url" :title="b.url">{{ getDomain(b.url || '') }}</div>
+                  </a>
+                </div>
+
+                <!-- Add placeholder card -->
+                <div
+                  v-if="navStore.editMode && !searchQuery.trim()"
+                  class="card add-card"
+                  role="button"
+                  aria-label="添加书签到当前目录"
+                  @click="openAddModal"
+                >
+                  <div class="add-body">
+                    <div class="add-icon">+</div>
+                    <div class="add-text">添加到这里</div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </template>
         </div>
 
         <!-- Toast -->
@@ -956,6 +1018,10 @@ onUnmounted(() => {
   color: #6b7280;
 }
 
+.desktop-copy-btn {
+  font-size: 12px;
+}
+
 /* 固定头：移动/桌面端均 sticky。mac-window 用 pt-10 md:pt-0 让位 MacMenuBar，
    滚动容器 nav-content 的可见顶部恰好是 MacMenuBar 下方，sticky top:0 不会被遮挡 */
 .sticky-bar {
@@ -990,6 +1056,75 @@ onUnmounted(() => {
   margin: 0;
   width: 100%;
   padding: 24px 20px 10px;
+}
+
+.source-copy-btn {
+  border: 1px solid #d4cfc4;
+  background: #ffffff;
+  color: #6f4c39;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.source-copy-btn:hover {
+  background: #f5efe9;
+  border-color: #ce8256;
+  color: #8b572a;
+}
+.dark .source-copy-btn {
+  background: #0d1117;
+  border-color: #30363d;
+  color: #c7cbd1;
+}
+.dark .source-copy-btn:hover {
+  background: #1a212b;
+  border-color: #ce8256;
+  color: #f1d2bd;
+}
+.source-code-wrap {
+  display: grid;
+  grid-template-columns: auto max-content;
+  align-items: start;
+  min-height: 100%;
+  width: max-content;
+  min-width: 100%;
+}
+.source-lines,
+.source-code {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.6;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  white-space: pre;
+}
+.source-lines {
+  padding: 16px 12px;
+  text-align: right;
+  user-select: none;
+  color: #9ca3af;
+  background: #faf8f4;
+  border-right: 1px solid #ece6de;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+.dark .source-lines {
+  color: #6b7280;
+  background: #161b22;
+  border-right-color: #30363d;
+}
+.source-code {
+  padding: 16px;
+  color: #1f2937;
+}
+.dark .source-code {
+  color: #e6edf3;
+}
+.source-empty {
+  min-height: 320px;
 }
 
 /* Breadcrumb */
